@@ -1,0 +1,439 @@
+[
+{
+  "model": "users.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$JK55yYW5GWz7kZWlWegqU1$LR3Lqq6vGsb901LVe9rKpg0V4p+ftoFHlms1M9vLeYs=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-03-09T14:47:46.655Z",
+    "role": "admin",
+    "name": "系统管理员",
+    "email": "admin@campus.com",
+    "student_id": "",
+    "employee_id": "",
+    "gender": "",
+    "phone": "",
+    "signature": "",
+    "major": "",
+    "grade": "",
+    "subject": "",
+    "department": "",
+    "points": 100,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$vgJW5Rq0FUtcptRQ1JYyy0$fptHo8S5luNUEJXMz3/9rmdeMgjwPmKbWVCAxlggXBI=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "t1",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-03-09T14:47:46.838Z",
+    "role": "teacher",
+    "name": "张老师",
+    "email": "t1@campus.com",
+    "student_id": "",
+    "employee_id": "101",
+    "gender": "",
+    "phone": "",
+    "signature": "",
+    "major": "",
+    "grade": "",
+    "subject": "Python编程",
+    "department": "计算机系",
+    "points": 50,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 3,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$Yxng8ZnUcVid8Q8Oziqox5$BES9CDQRzQ5Wm7ci1ZRkcc13FgkppHLwway4Gm64B5E=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "t2",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-03-09T14:47:47.019Z",
+    "role": "teacher",
+    "name": "李老师",
+    "email": "t2@campus.com",
+    "student_id": "",
+    "employee_id": "102",
+    "gender": "",
+    "phone": "",
+    "signature": "",
+    "major": "",
+    "grade": "",
+    "subject": "机器学习",
+    "department": "人工智能系",
+    "points": 50,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 4,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$gB7b1WFNs5DV7L5hOzlu1o$eXs+d/gluRB2rAaMgu4AneGmfZnmBR1PeNjALcNrY5U=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "s1",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-03-09T14:47:47.191Z",
+    "role": "student",
+    "name": "王小明",
+    "email": "s1@campus.com",
+    "student_id": "1001",
+    "employee_id": "",
+    "gender": "",
+    "phone": "",
+    "signature": "",
+    "major": "计算机科学",
+    "grade": "大一",
+    "subject": "",
+    "department": "",
+    "points": 100,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 5,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$oFz2zsZclTSsUvfHRlNXkd$O2SF3EVtnh0yjkO83yMjKz+1h2RqiHXzbYNqGFgPJyg=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "s2",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-03-09T14:47:47.352Z",
+    "role": "student",
+    "name": "李小红",
+    "email": "s2@campus.com",
+    "student_id": "1002",
+    "employee_id": "",
+    "gender": "",
+    "phone": "",
+    "signature": "",
+    "major": "软件工程",
+    "grade": "大二",
+    "subject": "",
+    "department": "",
+    "points": 80,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 6,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$4kGh9c4UMR1JdLSmVeNXlY$w8DDD4VBX09fJWDWbKMgzSFZxKqQS6ueDUMorzXpX6U=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "s3",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-03-09T14:47:47.511Z",
+    "role": "student",
+    "name": "赵小刚",
+    "email": "s3@campus.com",
+    "student_id": "1003",
+    "employee_id": "",
+    "gender": "",
+    "phone": "",
+    "signature": "",
+    "major": "数据科学",
+    "grade": "大三",
+    "subject": "",
+    "department": "",
+    "points": 120,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 7,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$OxnfcwdvtmSfowhcajWH5L$H1ZuDfAZIwBVxkXLtov+DtNbHKe296Zy50EC53K+7W8=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "teacher101",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-03-10T17:01:38.513Z",
+    "role": "teacher",
+    "name": "张教授",
+    "email": "",
+    "student_id": "",
+    "employee_id": "101",
+    "gender": "male",
+    "phone": "13800000101",
+    "signature": "",
+    "major": "",
+    "grade": "",
+    "subject": "计算机科学",
+    "department": "计算机学院",
+    "points": 500,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "courses.resourcetype",
+  "pk": 1,
+  "fields": {
+    "name": "课程资源",
+    "description": "",
+    "created_at": "2026-03-11T14:03:44.505Z"
+  }
+},
+{
+  "model": "courses.resourcetype",
+  "pk": 2,
+  "fields": {
+    "name": "二手书",
+    "description": "",
+    "created_at": "2026-03-11T14:03:44.509Z"
+  }
+},
+{
+  "model": "courses.resourcetype",
+  "pk": 3,
+  "fields": {
+    "name": "电子书",
+    "description": "",
+    "created_at": "2026-03-11T14:03:44.510Z"
+  }
+},
+{
+  "model": "courses.resourcetype",
+  "pk": 4,
+  "fields": {
+    "name": "其他",
+    "description": "",
+    "created_at": "2026-03-11T14:03:44.511Z"
+  }
+},
+{
+  "model": "courses.resourcetype",
+  "pk": 5,
+  "fields": {
+    "name": "人文类",
+    "description": "校内人文类课程",
+    "created_at": "2026-03-16T16:14:44.336Z"
+  }
+},
+{
+  "model": "courses.resourcetype",
+  "pk": 6,
+  "fields": {
+    "name": "海洋类",
+    "description": "校内海洋类课程",
+    "created_at": "2026-03-16T16:14:55.386Z"
+  }
+},
+{
+  "model": "courses.resourcetype",
+  "pk": 7,
+  "fields": {
+    "name": "历史类",
+    "description": "校内历史类课程",
+    "created_at": "2026-03-16T16:15:05.570Z"
+  }
+},
+{
+  "model": "courses.resourcetype",
+  "pk": 8,
+  "fields": {
+    "name": "政治类",
+    "description": "校内政治类课程",
+    "created_at": "2026-03-16T16:15:14.617Z"
+  }
+},
+{
+  "model": "courses.resourcetype",
+  "pk": 9,
+  "fields": {
+    "name": "MOOC",
+    "description": "慕课平台课程",
+    "created_at": "2026-03-16T16:15:24.644Z"
+  }
+},
+{
+  "model": "courses.resourcetype",
+  "pk": 10,
+  "fields": {
+    "name": "哔哩哔哩",
+    "description": "B站课程",
+    "created_at": "2026-03-16T16:15:34.332Z"
+  }
+},
+{
+  "model": "forum.forumpost",
+  "pk": 1,
+  "fields": {
+    "title": "欢迎来到校园课程平台",
+    "author": 1,
+    "content": "这是一个供大家学习交流的平台，欢迎所有同学和老师使用！",
+    "post_date": "2026-03-09T14:47:47.676Z",
+    "status": "approved",
+    "visible_to": "all"
+  }
+},
+{
+  "model": "forum.forumpost",
+  "pk": 2,
+  "fields": {
+    "title": "Python学习交流",
+    "author": 4,
+    "content": "有没有同学想一起学习Python？可以组个学习小组！",
+    "post_date": "2026-03-09T14:47:47.677Z",
+    "status": "approved",
+    "visible_to": "all"
+  }
+},
+{
+  "model": "forum.forumpost",
+  "pk": 3,
+  "fields": {
+    "title": "机器学习讨论",
+    "author": 5,
+    "content": "机器学习好难啊，大家有什么学习建议吗？",
+    "post_date": "2026-03-09T14:47:47.677Z",
+    "status": "approved",
+    "visible_to": "student"
+  }
+},
+{
+  "model": "announcements.announcement",
+  "pk": 1,
+  "fields": {
+    "title": "平台上线通知",
+    "content": "校园课程资源共享平台正式上线，欢迎大家使用！",
+    "author": 1,
+    "publish_date": "2026-03-09T14:47:47.678Z",
+    "status": "active",
+    "visible_to": "all"
+  }
+},
+{
+  "model": "announcements.announcement",
+  "pk": 2,
+  "fields": {
+    "title": "期末考试安排",
+    "content": "本学期期末考试安排已发布，请同学们关注。",
+    "author": 2,
+    "publish_date": "2026-03-09T14:47:47.678Z",
+    "status": "active",
+    "visible_to": "student"
+  }
+},
+{
+  "model": "announcements.announcement",
+  "pk": 3,
+  "fields": {
+    "title": "教师会议通知",
+    "content": "本周五下午3点召开全体教师会议。",
+    "author": 1,
+    "publish_date": "2026-03-09T14:47:47.679Z",
+    "status": "active",
+    "visible_to": "teacher"
+  }
+},
+{
+  "model": "points.prize",
+  "pk": 1,
+  "fields": {
+    "name": "笔记本",
+    "description": "精美硬壳笔记本",
+    "points_required": 50,
+    "stock": 20,
+    "image": "",
+    "is_active": true,
+    "created_at": "2026-03-09T14:47:47.679Z"
+  }
+},
+{
+  "model": "points.prize",
+  "pk": 2,
+  "fields": {
+    "name": "中性笔套装",
+    "description": "10支装中性笔",
+    "points_required": 30,
+    "stock": 50,
+    "image": "",
+    "is_active": true,
+    "created_at": "2026-03-09T14:47:47.679Z"
+  }
+},
+{
+  "model": "points.prize",
+  "pk": 3,
+  "fields": {
+    "name": "文件夹",
+    "description": "A4文件夹",
+    "points_required": 20,
+    "stock": 100,
+    "image": "",
+    "is_active": true,
+    "created_at": "2026-03-09T14:47:47.680Z"
+  }
+},
+{
+  "model": "points.prize",
+  "pk": 4,
+  "fields": {
+    "name": "水杯",
+    "description": "便携水杯",
+    "points_required": 80,
+    "stock": 15,
+    "image": "",
+    "is_active": true,
+    "created_at": "2026-03-09T14:47:47.680Z"
+  }
+},
+{
+  "model": "points.prize",
+  "pk": 5,
+  "fields": {
+    "name": "书包",
+    "description": "双肩背包",
+    "points_required": 200,
+    "stock": 5,
+    "image": "",
+    "is_active": true,
+    "created_at": "2026-03-09T14:47:47.680Z"
+  }
+}
+]
