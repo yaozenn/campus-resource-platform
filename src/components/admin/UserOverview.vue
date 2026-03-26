@@ -81,7 +81,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-import { IconUsers, IconUser, IconUserCircle, IconSettings, IconArrowLeft, IconBookOpen, IconGraduationCap } from '@/components/icons'
+import { IconUsers, IconUser, IconUserCircle, IconSettings, IconArrowLeft, IconBookOpen, IconGraduationCap } from '../icons'
 
 const router = useRouter()
 const users = ref<any[]>([])

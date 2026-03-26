@@ -157,7 +157,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-import { IconUsers, IconBookOpen, IconMessageCircle, IconGift, IconClipboard } from '@/components/icons'
+import { IconUsers, IconBookOpen, IconMessageCircle, IconGift, IconClipboard } from '../icons'
 
 const router = useRouter()
 
