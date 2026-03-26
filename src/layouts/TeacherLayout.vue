@@ -1,81 +1,74 @@
 <template>
   <div class="dashboard">
-    <div class="sidebar">
-      <div class="sidebar-brand">
-        <div class="brand-icon">🎓</div>
-        <span class="brand-name">老师后台</span>
+    <!-- 顶部导航栏 - 磨玻璃效果 -->
+    <header class="top-nav glass">
+      <div class="nav-brand">
+        <IconBook class="brand-icon" />
+        <span class="brand-name">教师工作台</span>
       </div>
-
-      <div class="user-card">
-        <div class="user-avatar">{{ userInitial }}</div>
-        <div class="user-meta">
-          <div class="user-name">{{ userName }}</div>
-          <div class="user-role">{{ userDept || '教师' }}</div>
-        </div>
-      </div>
-
-      <nav class="sidebar-nav">
-        <!-- 教学管理模块 -->
-        <div class="nav-group">
-          <div class="nav-group-title">教学管理</div>
-          <router-link to="/teacher/courses">
-            <span class="nav-icon">📚</span>资源管理
-          </router-link>
-          <router-link to="/teacher/comments">
-            <span class="nav-icon">💬</span>评论回复
-          </router-link>
-          <router-link to="/teacher/students">
-            <span class="nav-icon">🎒</span>学生管理
-          </router-link>
-        </div>
-        
-        <!-- 智能工具模块 -->
-        <div class="nav-group">
-          <div class="nav-group-title">智能工具</div>
-          <router-link to="/teacher/ai">
-            <span class="nav-icon">🤖</span>智能助手
-          </router-link>
-        </div>
-        
-        <!-- 交流互动模块 -->
-        <div class="nav-group">
-          <div class="nav-group-title">交流互动</div>
-          <router-link to="/teacher/announcements">
-            <span class="nav-icon">📢</span>公告
-          </router-link>
-          <router-link to="/teacher/forum">
-            <span class="nav-icon">🗨️</span>论坛
-          </router-link>
-        </div>
-        
-        <!-- 个人管理模块 -->
-        <div class="nav-group">
-          <div class="nav-group-title">个人管理</div>
-          <router-link to="/teacher/personal">
-            <span class="nav-icon">👤</span>个人中心
-          </router-link>
-        </div>
+      
+      <nav class="nav-menu">
+        <router-link to="/teacher/courses" class="nav-item">
+          <IconBook class="nav-icon" />
+          <span>资源管理</span>
+        </router-link>
+        <router-link to="/teacher/comments" class="nav-item">
+          <IconMessage class="nav-icon" />
+          <span>评论回复</span>
+        </router-link>
+        <router-link to="/teacher/students" class="nav-item">
+          <IconUser class="nav-icon" />
+          <span>学生管理</span>
+        </router-link>
+        <router-link to="/teacher/ai" class="nav-item">
+          <IconSettings class="nav-icon" />
+          <span>智能助手</span>
+        </router-link>
+        <router-link to="/teacher/announcements" class="nav-item">
+          <IconAnnouncement class="nav-icon" />
+          <span>公告</span>
+        </router-link>
+        <router-link to="/teacher/forum" class="nav-item">
+          <IconForum class="nav-icon" />
+          <span>论坛</span>
+        </router-link>
       </nav>
-
-      <button @click="handleLogout" class="logout-btn">
-        <span>🚪</span> 退出登录
-      </button>
-    </div>
-    <div class="content">
+      
+      <div class="nav-actions">
+        <router-link to="/teacher/personal" class="user-info">
+          <div class="user-avatar">{{ userInitial }}</div>
+          <span class="user-name">{{ userName }}</span>
+        </router-link>
+        <button @click="handleLogout" class="logout-btn" title="退出登录">
+          <IconLogout class="logout-icon" />
+        </button>
+      </div>
+    </header>
+    
+    <!-- 主内容区 -->
+    <main class="main-content">
       <router-view />
-    </div>
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { 
+  IconBook, 
+  IconMessage, 
+  IconUser, 
+  IconSettings,
+  IconAnnouncement,
+  IconForum,
+  IconLogout 
+} from '../components/icons'
 
 const router = useRouter()
 const user = JSON.parse(localStorage.getItem('user') || '{}')
 const userName = computed(() => user.name || user.username || '老师')
 const userInitial = computed(() => (user.name || user.username || 'T').charAt(0).toUpperCase())
-const userDept = computed(() => user.department || user.subject || '')
 
 const handleLogout = () => {
   localStorage.removeItem('token')
@@ -85,123 +78,149 @@ const handleLogout = () => {
 </script>
 
 <style scoped>
-.dashboard { display: flex; min-height: 100vh; }
-
-.sidebar {
-  width: 240px;
-  background: var(--teacher-bg);
-  color: white;
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
+.dashboard {
+  min-height: 100vh;
+  background: var(--bg-color);
 }
 
-.sidebar-brand {
+/* 顶部导航栏 - 磨玻璃效果 */
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 22px 20px 18px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  justify-content: space-between;
+  padding: 0 32px;
+  z-index: 1000;
+  border-bottom: 1px solid var(--glass-border);
 }
-.brand-icon { font-size: 24px; }
-.brand-name { font-size: 15px; font-weight: 700; letter-spacing: 0.5px; }
 
-.user-card {
+.nav-brand {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 20px;
-  margin: 12px 12px 8px;
-  background: rgba(255,255,255,0.07);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-md);
-  backdrop-filter: blur(10px);
-}
-.user-avatar {
-  width: 38px; height: 38px;
-  background: linear-gradient(135deg, #67c23a, #95d475);
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; font-weight: 700; flex-shrink: 0;
-}
-.user-name { font-size: 14px; font-weight: 600; color: #fff; }
-.user-role { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
-
-.sidebar-nav {
-  flex: 1;
-  padding: 8px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  overflow-y: auto;
-  max-height: calc(100vh - 220px);
 }
 
-.nav-group {
+.brand-icon {
+  width: 32px;
+  height: 32px;
+  color: var(--primary-color);
+}
+
+.brand-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-sf);
+  letter-spacing: -0.5px;
+}
+
+/* 导航菜单 */
+.nav-menu {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 4px;
 }
 
-.nav-group-title {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: rgba(255,255,255,0.5);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 0 16px 8px;
-  margin-top: 8px;
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--border-radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all var(--transition-fast);
 }
-.sidebar-nav a {
+
+.nav-item:hover {
+  color: var(--primary-color);
+  background: rgba(13, 148, 136, 0.08);
+}
+
+.nav-item.router-link-active {
+  color: var(--primary-color);
+  background: rgba(13, 148, 136, 0.12);
+}
+
+.nav-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* 右侧操作区 */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-info {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 16px;
-  color: rgba(255,255,255,0.65);
   text-decoration: none;
-  border-radius: var(--border-radius-md);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  transition: all var(--transition-normal);
-  position: relative;
-  overflow: hidden;
+  padding: 6px 12px 6px 6px;
+  border-radius: 24px;
+  transition: background var(--transition-fast);
 }
-.sidebar-nav a:hover {
-  background: rgba(255,255,255,0.08);
-  color: #fff;
-  transform: translateX(4px);
-  box-shadow: var(--shadow-sm);
-}
-.sidebar-nav a.router-link-active {
-  background: linear-gradient(135deg, var(--teacher-primary), var(--success-light));
-  color: white;
-  box-shadow: var(--shadow-md);
-  transform: translateX(4px);
-}
-.nav-icon { font-size: 16px; width: 20px; text-align: center; }
 
-.logout-btn {
-  margin: 12px;
-  padding: 12px 16px;
-  background: rgba(245,108,108,0.15);
-  color: #f56c6c;
-  border: 1px solid rgba(245,108,108,0.25);
-  border-radius: var(--border-radius-md);
-  cursor: pointer;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+.user-info:hover {
+  background: rgba(13, 148, 136, 0.08);
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  transition: all var(--transition-normal);
-  box-shadow: var(--shadow-sm);
-}
-.logout-btn:hover {
-  background: rgba(245,108,108,0.25);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
 }
 
-.content { flex: 1; background: #f4f6fb; overflow-y: auto; min-width: 0; }
+.user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.logout-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.logout-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* 主内容区 */
+.main-content {
+  padding-top: 64px;
+  min-height: 100vh;
+}
 </style>

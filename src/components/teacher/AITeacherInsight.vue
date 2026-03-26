@@ -6,8 +6,9 @@
         <span class="beta-tag">AI 驱动</span>
       </div>
       <button @click="fetchInsight" class="btn-refresh" :disabled="loading">
+        <IconRefresh v-if="!loading" class="btn-icon" />
         <span v-if="loading">分析中...</span>
-        <span v-else">🔄 重新分析</span>
+        <span v-else>重新分析</span>
       </button>
     </div>
 
@@ -22,7 +23,9 @@
     <!-- AI 建议卡片 -->
     <div v-else-if="insight" class="insight-card">
       <div class="insight-header">
-        <span class="ai-avatar">🤖</span>
+        <div class="ai-avatar">
+          <IconSettings class="ai-icon" />
+        </div>
         <div>
           <div class="ai-name">教学顾问 AI</div>
           <div class="ai-time">{{ currentTime }}</div>
@@ -30,13 +33,19 @@
       </div>
       <div class="insight-content">{{ insight }}</div>
       <div class="insight-footer">
-        <span class="footer-tip">💡 建议基于您的课程数据实时生成，每次点击「重新分析」可获取新建议</span>
+        <span class="footer-tip">
+          <IconInfo class="tip-icon" />
+          建议基于您的课程数据实时生成，每次点击「重新分析」可获取新建议
+        </span>
       </div>
     </div>
 
     <!-- 课程数据概览 -->
     <div v-if="stats.length > 0" class="stats-section">
-      <h3 class="section-title">📊 课程数据概览</h3>
+      <h3 class="section-title">
+        <IconCollection class="section-icon" />
+        课程数据概览
+      </h3>
       <div class="stats-grid">
         <div v-for="course in stats" :key="course.id" class="stat-card">
           <div class="stat-card-header">
@@ -66,7 +75,7 @@
 
     <!-- 空状态 -->
     <div v-if="!loading && !insight" class="empty-state">
-      <div class="empty-icon">🎓</div>
+      <IconBook class="empty-icon" />
       <p class="empty-title">点击「重新分析」获取您的教学建议</p>
       <p class="empty-sub">AI 将根据您的课程数据生成个性化建议</p>
     </div>
@@ -76,6 +85,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import { IconRefresh, IconSettings, IconInfo, IconCollection, IconBook } from '../../components/icons'
 
 const insight = ref('')
 const stats = ref<any[]>([])
@@ -119,42 +129,47 @@ onMounted(fetchInsight)
   margin-bottom: 24px;
 }
 .header-left { display: flex; align-items: center; gap: 12px; }
-.page-header h2 { margin: 0; font-size: 22px; color: #1a1a2e; }
+.page-header h2 { margin: 0; font-size: 22px; color: var(--text-primary); font-family: var(--font-sf); }
 .beta-tag {
   padding: 3px 10px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
   color: white;
   border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
 }
 .btn-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 10px 20px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--border-radius);
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  transition: opacity 0.2s;
+  transition: all var(--transition-fast);
 }
-.btn-refresh:hover { opacity: 0.88; }
+.btn-refresh:hover { background: var(--primary-dark); }
 .btn-refresh:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-icon { width: 16px; height: 16px; }
 
 /* 加载 */
 .loading-card {
   background: white;
-  border-radius: 16px;
+  border-radius: var(--border-radius-xl);
   padding: 48px;
   text-align: center;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  box-shadow: var(--shadow-md);
   margin-bottom: 24px;
+  border: 1px solid var(--border-light);
 }
 .loading-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; }
 .loading-dots span {
   width: 10px; height: 10px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: var(--primary-color);
   border-radius: 50%;
   animation: bounce 1.4s infinite ease-in-out both;
 }
@@ -164,16 +179,17 @@ onMounted(fetchInsight)
   0%, 80%, 100% { transform: scale(0); }
   40% { transform: scale(1); }
 }
-.loading-card p { color: #909399; font-size: 14px; margin: 0; }
+.loading-card p { color: var(--text-secondary); font-size: 14px; margin: 0; }
 
 /* AI 建议卡片 */
 .insight-card {
   background: white;
-  border-radius: 16px;
+  border-radius: var(--border-radius-xl);
   padding: 24px 28px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  box-shadow: var(--shadow-md);
   margin-bottom: 24px;
-  border-left: 4px solid #764ba2;
+  border-left: 4px solid var(--primary-color);
+  border: 1px solid var(--border-light);
 }
 .insight-header {
   display: flex;
@@ -181,22 +197,26 @@ onMounted(fetchInsight)
   gap: 14px;
   margin-bottom: 16px;
   padding-bottom: 14px;
-  border-bottom: 1px solid #f0f2f5;
+  border-bottom: 1px solid var(--border-light);
 }
 .ai-avatar {
-  font-size: 36px;
-  background: linear-gradient(135deg, #f5f0ff, #e8e0ff);
+  background: rgba(13, 148, 136, 0.1);
   width: 52px; height: 52px;
   border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.ai-name { font-size: 15px; font-weight: 600; color: #1a1a2e; }
-.ai-time { font-size: 12px; color: #c0c4cc; margin-top: 3px; }
+.ai-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--primary-color);
+}
+.ai-name { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.ai-time { font-size: 12px; color: var(--text-tertiary); margin-top: 3px; }
 
 .insight-content {
   font-size: 15px;
-  color: #303133;
+  color: var(--text-primary);
   line-height: 1.9;
   white-space: pre-wrap;
 }
@@ -204,16 +224,34 @@ onMounted(fetchInsight)
 .insight-footer {
   margin-top: 16px;
   padding-top: 14px;
-  border-top: 1px solid #f0f2f5;
+  border-top: 1px solid var(--border-light);
 }
-.footer-tip { font-size: 12px; color: #c0c4cc; }
+.footer-tip { 
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px; 
+  color: var(--text-tertiary); 
+}
+.tip-icon {
+  width: 14px;
+  height: 14px;
+}
 
 /* 课程数据 */
 .section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 16px;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-primary);
   margin-bottom: 16px;
+}
+.section-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--primary-color);
 }
 .stats-grid {
   display: grid;
@@ -222,10 +260,10 @@ onMounted(fetchInsight)
 }
 .stat-card {
   background: white;
-  border-radius: 12px;
+  border-radius: var(--border-radius-lg);
   padding: 18px 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  border: 1px solid #f0f2f5;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
 }
 .stat-card-header {
   display: flex;
@@ -237,7 +275,7 @@ onMounted(fetchInsight)
 .course-title {
   font-size: 14px;
   font-weight: 600;
-  color: #1a1a2e;
+  color: var(--text-primary);
   line-height: 1.4;
   flex: 1;
 }
@@ -248,34 +286,34 @@ onMounted(fetchInsight)
   white-space: nowrap;
   flex-shrink: 0;
 }
-.status-tag.active { background: #f0f9eb; color: #67c23a; }
-.status-tag.pending { background: #fdf6ec; color: #e6a23c; }
-.status-tag.rejected { background: #fef0f0; color: #f56c6c; }
+.status-tag.active { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.status-tag.pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.status-tag.rejected { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 
 .stat-numbers {
   display: flex;
   align-items: center;
   gap: 0;
   margin-bottom: 12px;
-  background: #f8f9fc;
+  background: var(--bg-tertiary);
   border-radius: 10px;
   padding: 10px 0;
 }
 .stat-item { flex: 1; text-align: center; }
-.stat-num { font-size: 24px; font-weight: 700; color: #1a1a2e; line-height: 1; }
-.stat-label { font-size: 11px; color: #909399; margin-top: 4px; }
-.stat-divider { width: 1px; height: 36px; background: #ebeef5; }
+.stat-num { font-size: 24px; font-weight: 700; color: var(--text-primary); line-height: 1; font-family: var(--font-sf); }
+.stat-label { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+.stat-divider { width: 1px; height: 36px; background: var(--border-color); }
 
 .recent-comments { }
-.comments-label { font-size: 12px; color: #909399; margin-bottom: 6px; }
+.comments-label { font-size: 12px; color: var(--text-tertiary); margin-bottom: 6px; }
 .comment-preview {
   font-size: 12px;
-  color: #606266;
-  background: #f8f9fc;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
   padding: 6px 10px;
   border-radius: 6px;
   margin-bottom: 4px;
-  border-left: 2px solid #dcdfe6;
+  border-left: 2px solid var(--border-color);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -285,9 +323,14 @@ onMounted(fetchInsight)
 .empty-state {
   text-align: center;
   padding: 80px 20px;
-  color: #c0c4cc;
+  color: var(--text-tertiary);
 }
-.empty-icon { font-size: 64px; margin-bottom: 16px; }
-.empty-title { font-size: 16px; color: #909399; margin: 0 0 8px; }
+.empty-icon { 
+  width: 64px; 
+  height: 64px; 
+  margin: 0 auto 16px; 
+  color: var(--text-tertiary);
+}
+.empty-title { font-size: 16px; color: var(--text-secondary); margin: 0 0 8px; }
 .empty-sub { font-size: 13px; margin: 0; }
 </style>

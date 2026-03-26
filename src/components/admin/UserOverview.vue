@@ -1,33 +1,45 @@
 <template>
   <div class="page-container">
     <div class="page-header">
-      <button @click="goBack" class="btn-back">← 返回数据分析</button>
-      <h2>用户总览</h2>
+      <button @click="goBack" class="btn-back">
+        <IconArrowLeft class="btn-icon" />
+        返回数据分析
+      </button>
+      <h2>
+        <IconUsers class="header-icon" />
+        用户总览
+      </h2>
     </div>
 
     <!-- 统计卡片 -->
     <div class="stats-summary">
       <div class="summary-card">
+        <div class="summary-icon"><IconUsers class="icon-svg" /></div>
         <div class="summary-value">{{ totalUsers }}</div>
         <div class="summary-label">总用户数</div>
       </div>
       <div class="summary-card">
+        <div class="summary-icon"><IconUser class="icon-svg" /></div>
         <div class="summary-value">{{ teacherCount }}</div>
         <div class="summary-label">老师</div>
       </div>
       <div class="summary-card">
+        <div class="summary-icon"><IconUserCircle class="icon-svg" /></div>
         <div class="summary-value">{{ studentCount }}</div>
         <div class="summary-label">学生</div>
       </div>
       <div class="summary-card">
+        <div class="summary-icon"><IconSettings class="icon-svg" /></div>
         <div class="summary-value">{{ adminCount }}</div>
         <div class="summary-label">管理员</div>
       </div>
       <div class="summary-card">
+        <div class="summary-icon"><IconUser class="icon-svg" /></div>
         <div class="summary-value">{{ maleCount }}</div>
         <div class="summary-label">男性</div>
       </div>
       <div class="summary-card">
+        <div class="summary-icon"><IconUser class="icon-svg" /></div>
         <div class="summary-value">{{ femaleCount }}</div>
         <div class="summary-label">女性</div>
       </div>
@@ -54,9 +66,9 @@
             <div class="user-username">@{{ user.username }}</div>
             <div class="user-meta">
               <span class="role-tag" :class="user.role">{{ getRoleText(user.role) }}</span>
-              <span v-if="user.gender">⚧ {{ user.gender }}</span>
-              <span v-if="user.major">📚 {{ user.major }}</span>
-              <span v-if="user.grade">🎓 {{ user.grade }}级</span>
+              <span v-if="user.gender"><IconUser class="meta-icon-svg" /> {{ user.gender }}</span>
+              <span v-if="user.major"><IconBookOpen class="meta-icon-svg" /> {{ user.major }}</span>
+              <span v-if="user.grade"><IconGraduationCap class="meta-icon-svg" /> {{ user.grade }}级</span>
             </div>
           </div>
         </div>
@@ -69,6 +81,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import { IconUsers, IconUser, IconUserCircle, IconSettings, IconArrowLeft, IconBookOpen, IconGraduationCap } from '@/components/icons'
 
 const router = useRouter()
 const users = ref<any[]>([])
@@ -144,76 +157,114 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container { padding: 20px; }
+.page-container { padding: var(--spacing-lg); }
 
 .page-header {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-bottom: 30px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .btn-back {
-  padding: 8px 16px;
-  background: #f0f0f0;
-  border: none;
-  border-radius: 4px;
+  padding: 10px 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--font-size-base);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
 }
 
 .btn-back:hover {
-  background: #e0e0e0;
+  background: var(--bg-tertiary);
+  border-color: var(--primary-color);
 }
+
+.btn-icon { width: 16px; height: 16px; }
 
 .page-header h2 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
+  font-size: var(--h2-font-size);
+  font-weight: var(--h2-font-weight);
+  display: flex;
+  align-items: center;
 }
+
+.header-icon { width: 28px; height: 28px; color: var(--primary-color); margin-right: 10px; }
 
 .stats-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
 
 .summary-card {
-  background: white;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: var(--bg-primary);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
   text-align: center;
+  transition: box-shadow var(--transition-normal);
 }
 
+.summary-card:hover { box-shadow: var(--shadow-md); }
+
+.summary-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--spacing-sm);
+  background: rgba(13, 148, 136, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-svg { width: 24px; height: 24px; color: var(--primary-color); }
+
 .summary-value {
-  font-size: 36px;
-  font-weight: bold;
-  color: #409eff;
-  margin-bottom: 10px;
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
+  color: var(--primary-color);
+  margin-bottom: 8px;
 }
 
 .summary-label {
-  font-size: 14px;
-  color: #666;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
 }
 
 .user-section h3 {
-  margin-bottom: 20px;
-  color: #333;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+  font-size: var(--h4-font-size);
+  font-weight: var(--h4-font-weight);
 }
 
 .filter-bar {
   display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
 }
 
 .search-input, .filter-select {
-  padding: 10px 16px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
+  padding: 12px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  background: var(--bg-primary);
+  transition: border-color var(--transition-fast);
+}
+
+.search-input:focus, .filter-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
 }
 
 .search-input {
@@ -227,30 +278,33 @@ onMounted(() => {
 .user-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: var(--spacing-md);
 }
 
 .user-card {
   display: flex;
   align-items: center;
   gap: 20px;
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: var(--bg-primary);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-normal);
 }
+
+.user-card:hover { box-shadow: var(--shadow-md); }
 
 .user-avatar {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
   flex-shrink: 0;
 }
 
@@ -259,44 +313,52 @@ onMounted(() => {
 }
 
 .user-name {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
   margin-bottom: 5px;
 }
 
 .user-username {
-  font-size: 14px;
-  color: #999;
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
   margin-bottom: 10px;
 }
 
 .user-meta {
   display: flex;
   gap: 15px;
-  font-size: 14px;
-  color: #666;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
 }
 
+.user-meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.meta-icon-svg { width: 14px; height: 14px; }
+
 .role-tag {
-  padding: 3px 10px;
-  background: #f0f0f0;
-  border-radius: 12px;
-  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
 }
 
 .role-tag.admin {
-  background: #fde2e2;
-  color: #f56c6c;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
 }
 
 .role-tag.teacher {
-  background: #e6f7ff;
-  color: #1890ff;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
 }
 
 .role-tag.student {
-  background: #f6ffed;
-  color: #52c41a;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success-color);
 }
 </style>

@@ -37,7 +37,14 @@ const getVisibleText = (visible: string) => {
 }
 
 const viewAnnouncement = (ann: any) => {
-  router.push(`/student/announcements/${ann.id}`)
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  if (user.role === 'teacher') {
+    router.push(`/teacher/announcements/${ann.id}`)
+  } else if (user.role === 'admin') {
+    router.push(`/admin/announcements/${ann.id}`)
+  } else {
+    router.push(`/student/announcements/${ann.id}`)
+  }
 }
 
 const fetchAnnouncements = async () => {

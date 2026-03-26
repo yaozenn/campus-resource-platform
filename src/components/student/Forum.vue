@@ -1,18 +1,61 @@
 <template>
   <div class="page-container">
-    <h2>论坛</h2>
-    <div class="toolbar">
-      <button @click="showPostDialog = true" class="btn-add">发帖</button>
+    <div class="forum-header">
+      <h2>
+        <IconMessageCircle class="header-icon" />
+        交流论坛
+      </h2>
+      <button @click="showPostDialog = true" class="btn-add">
+        <IconEdit class="btn-icon-svg" />
+        <span>发布帖子</span>
+      </button>
     </div>
+    
     <div class="post-list">
       <div v-for="post in posts" :key="post.id" class="post-item" @click="viewPost(post)">
-        <h3>{{ post.title }}</h3>
-        <p>{{ post.content.substring(0, 100) }}{{ post.content.length > 100 ? '...' : '' }}</p>
-        <div class="post-info">
-          <span>作者：{{ post.author?.name || post.author?.username }}</span>
-          <span>时间：{{ formatTime(post.post_date) }}</span>
-          <span class="visible-tag">{{ getVisibleText(post.visible_to) }}</span>
+        <div class="post-avatar">
+          <div class="avatar-circle">
+            {{ getAvatarInitials(post.author) }}
+          </div>
         </div>
+        
+        <div class="post-content">
+          <div class="post-header">
+            <h3 class="post-title">
+              <span v-if="isHotPost(post)" class="hot-tag">
+                <IconFlame class="hot-icon" />
+                热门
+              </span>
+              {{ post.title }}
+            </h3>
+            <span class="visible-tag">{{ getVisibleText(post.visible_to) }}</span>
+          </div>
+          
+          <p class="post-excerpt">{{ post.content.substring(0, 120) }}{{ post.content.length > 120 ? '...' : '' }}</p>
+          
+          <div class="post-footer">
+            <div class="post-author">
+              <span class="author-name">{{ post.author?.name || post.author?.username }}</span>
+              <span class="post-time">{{ formatTime(post.post_date) }}</span>
+            </div>
+            
+            <div class="post-stats">
+              <span class="stat-item" title="浏览量">
+                <IconEye class="stat-icon-svg" />
+                <span class="stat-value">{{ post.views || 0 }}</span>
+              </span>
+              <span class="stat-item" title="回复数">
+                <IconMessageCircle class="stat-icon-svg" />
+                <span class="stat-value">{{ post.replies || 0 }}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div v-if="posts.length === 0" class="empty-state">
+        <IconInbox class="empty-icon-svg" />
+        <p>暂无帖子，快来发布第一条帖子吧！</p>
       </div>
     </div>
 
@@ -42,6 +85,7 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { formatTime } from '../../utils/timeFormat'
 import { useRouter } from 'vue-router'
+import { IconMessageCircle, IconEdit, IconFlame, IconEye, IconInbox } from '../../components/icons'
 
 const posts = ref<any[]>([])
 const showPostDialog = ref(false)
@@ -54,8 +98,27 @@ const getVisibleText = (visible: string) => {
   return map[visible] || visible
 }
 
+const getAvatarInitials = (author: any) => {
+  if (!author) return 'U'
+  const name = author.name || author.username || 'Unknown'
+  return name.charAt(0).toUpperCase()
+}
+
+const isHotPost = (post: any) => {
+  const views = post.views || 0
+  const replies = post.replies || 0
+  return views > 100 || replies > 20
+}
+
 const viewPost = (post: any) => {
-  router.push(`/student/forum/${post.id}`)
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  if (user.role === 'teacher') {
+    router.push(`/teacher/forum/${post.id}`)
+  } else if (user.role === 'admin') {
+    router.push(`/admin/forum/${post.id}`)
+  } else {
+    router.push(`/student/forum/${post.id}`)
+  }
 }
 
 const fetchPosts = async () => {
@@ -89,20 +152,380 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container { padding: 20px; }
-.toolbar { margin-bottom: 20px; }
-.btn-add { padding: 8px 16px; background: #409eff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-.post-list { display: flex; flex-direction: column; gap: 15px; }
-.post-item { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-.post-item h3 { margin: 0 0 10px; }
-.post-info { display: flex; justify-content: space-between; color: #999; font-size: 14px; margin-top: 10px; }
-.visible-tag { background: #e6f7ff; color: #1890ff; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
-.dialog-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-.dialog { background: white; padding: 24px; border-radius: 8px; min-width: 400px; }
-.dialog h3 { margin: 0 0 16px; }
-.dialog form { display: flex; flex-direction: column; gap: 12px; }
-.dialog input, .dialog textarea, .dialog select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; }
-.dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
-.btn-cancel { padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; }
-.btn-submit { padding: 8px 16px; background: #409eff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+.page-container { 
+  padding: 24px; 
+  background-color: var(--color-background);
+  min-height: 100vh;
+}
+
+.forum-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.forum-header h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--primary-color);
+}
+
+.btn-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-lg);
+  cursor: pointer;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+.btn-add:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(13, 148, 136, 0.4);
+}
+
+.btn-icon-svg {
+  width: 18px;
+  height: 18px;
+}
+
+.post-list { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 16px; 
+}
+
+.post-item { 
+  background: var(--bg-primary);
+  padding: 24px; 
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-light);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  display: flex;
+  gap: 16px;
+}
+
+.post-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-light);
+}
+
+.post-avatar {
+  flex-shrink: 0;
+}
+
+.avatar-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--border-radius-full);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  box-shadow: var(--shadow-sm);
+}
+
+.post-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.post-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hot-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+  color: white;
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.hot-icon {
+  width: 14px;
+  height: 14px;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.visible-tag { 
+  display: inline-block;
+  padding: 4px 12px; 
+  background: var(--primary-light); 
+  color: var(--primary-color); 
+  border-radius: var(--border-radius); 
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.post-excerpt {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  margin: 0 0 16px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-light);
+}
+
+.post-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.author-name {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+}
+
+.post-time {
+  color: var(--text-placeholder);
+  font-size: var(--font-size-xs);
+}
+
+.post-stats {
+  display: flex;
+  gap: 16px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.stat-icon-svg {
+  width: 16px;
+  height: 16px;
+  color: var(--text-tertiary);
+}
+
+.stat-value {
+  font-weight: var(--font-weight-medium);
+}
+
+.empty-state { 
+  text-align: center; 
+  padding: 80px 20px; 
+  color: var(--text-placeholder);
+}
+
+.empty-icon-svg {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  color: var(--text-tertiary);
+}
+
+/* 弹窗样式 */
+.dialog-overlay { 
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  right: 0; 
+  bottom: 0; 
+  background: rgba(0, 0, 0, 0.5); 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  z-index: 1000;
+  animation: fadeIn var(--transition-fast);
+}
+
+.dialog { 
+  background: var(--bg-primary);
+  padding: 24px; 
+  border-radius: var(--border-radius-lg); 
+  min-width: 450px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
+  animation: slideIn var(--transition-normal);
+}
+
+.dialog h3 { 
+  margin: 0 0 20px; 
+  color: var(--text-primary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+.dialog form { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 16px; 
+}
+
+.dialog input, 
+.dialog textarea, 
+.dialog select { 
+  padding: 12px 16px; 
+  border: 1px solid var(--border-color); 
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  transition: all var(--transition-fast);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.dialog input:focus,
+.dialog textarea:focus,
+.dialog select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
+.dialog-actions { 
+  display: flex; 
+  justify-content: flex-end; 
+  gap: 12px; 
+  margin-top: 24px; 
+}
+
+.btn-cancel { 
+  padding: 10px 20px; 
+  border: 1px solid var(--border-color); 
+  background: var(--bg-primary); 
+  border-radius: var(--border-radius); 
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+}
+
+.btn-cancel:hover {
+  background: var(--bg-secondary);
+  border-color: var(--text-secondary);
+}
+
+.btn-submit { 
+  padding: 10px 20px; 
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  color: white; 
+  border: none; 
+  border-radius: var(--border-radius); 
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+}
+
+.btn-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.4);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .forum-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .forum-header h2 {
+    font-size: var(--font-size-xl);
+  }
+  
+  .btn-add {
+    justify-content: center;
+  }
+  
+  .post-item {
+    flex-direction: column;
+    padding: 16px;
+  }
+  
+  .post-avatar {
+    align-self: flex-start;
+  }
+  
+  .post-footer {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+}
 </style>

@@ -30,6 +30,16 @@ class PostDetailView(generics.RetrieveAPIView):
     serializer_class = PostSerializer
     permission_classes = [permissions.AllowAny]
 
+class PostViewCountView(generics.GenericAPIView):
+    queryset = ForumPost.objects.all()
+    permission_classes = [permissions.AllowAny]
+    
+    def post(self, request, *args, **kwargs):
+        post = self.get_object()
+        post.views = (post.views or 0) + 1
+        post.save(update_fields=['views'])
+        return Response({'status': 'ok', 'views': post.views})
+
 class PostUpdateView(generics.UpdateAPIView):
     queryset = ForumPost.objects.all()
     serializer_class = PostCreateSerializer

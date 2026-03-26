@@ -17,9 +17,9 @@
     </div>
 
     <div class="filter-bar">
-      <input 
-        v-model="searchText" 
-        placeholder="搜索学生姓名或学号..." 
+      <input
+        v-model="searchText"
+        placeholder="搜索学生姓名或学号..."
         class="search-input"
       />
       <select v-model="filterMajor" class="filter-select">
@@ -46,17 +46,23 @@
             <span class="tag tag-success">{{ student.grade }}级</span>
           </div>
           <div class="student-meta">
-            <span>📧 {{ student.email }}</span>
-            <span>📱 {{ student.phone || '未设置' }}</span>
+            <span class="meta-item">
+              <IconEmail class="meta-icon" />
+              {{ student.email }}
+            </span>
+            <span class="meta-item">
+              <IconPhone class="meta-icon" />
+              {{ student.phone || '未设置' }}
+            </span>
           </div>
         </div>
         <div class="student-actions">
           <button @click="viewStudent(student)" class="btn-view">查看详情</button>
         </div>
       </div>
-      
+
       <div v-if="filteredStudents.length === 0" class="empty-state">
-        <div class="empty-icon">👥</div>
+        <IconUser class="empty-icon" />
         <p>暂无学生</p>
       </div>
     </div>
@@ -66,6 +72,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
+import { IconEmail, IconPhone, IconUser } from '../../components/icons'
 
 const students = ref<any[]>([])
 const searchText = ref('')
@@ -91,7 +98,7 @@ const getGradeCount = computed(() => grades.value.length)
 
 const filteredStudents = computed(() => {
   return students.value.filter(student => {
-    const matchesSearch = searchText.value === '' || 
+    const matchesSearch = searchText.value === '' ||
                          student.name.includes(searchText.value) ||
                          student.username.includes(searchText.value)
     const matchesMajor = filterMajor.value === '' || student.major === filterMajor.value
@@ -140,7 +147,7 @@ onMounted(() => {
 <style scoped>
 .page-container { padding: 20px; }
 
-h2 { margin-bottom: 20px; color: #333; }
+h2 { margin-bottom: 20px; color: var(--text-primary); font-family: var(--font-sf); }
 
 .stats-bar {
   display: flex;
@@ -152,21 +159,23 @@ h2 { margin-bottom: 20px; color: #333; }
   flex: 1;
   background: white;
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
   text-align: center;
+  border: 1px solid var(--border-light);
 }
 
 .stat-value {
   font-size: 32px;
-  font-weight: bold;
-  color: #409eff;
+  font-weight: 700;
+  color: var(--primary-color);
   margin-bottom: 8px;
+  font-family: var(--font-sf);
 }
 
 .stat-label {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .filter-bar {
@@ -176,10 +185,17 @@ h2 { margin-bottom: 20px; color: #333; }
 }
 
 .search-input, .filter-select {
-  padding: 10px 16px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 12px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
   font-size: 14px;
+  transition: all var(--transition-fast);
+}
+
+.search-input:focus, .filter-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
 }
 
 .search-input {
@@ -202,13 +218,14 @@ h2 { margin-bottom: 20px; color: #333; }
   gap: 20px;
   background: white;
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: all 0.3s;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-fast);
+  border: 1px solid var(--border-light);
 }
 
 .student-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
 }
 
@@ -220,13 +237,13 @@ h2 { margin-bottom: 20px; color: #333; }
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  font-weight: bold;
+  font-weight: 700;
 }
 
 .student-info {
@@ -235,13 +252,14 @@ h2 { margin-bottom: 20px; color: #333; }
 
 .student-info h3 {
   margin: 0 0 5px;
-  color: #333;
+  color: var(--text-primary);
   font-size: 18px;
+  font-weight: 600;
 }
 
 .student-username {
   margin: 0 0 10px;
-  color: #999;
+  color: var(--text-tertiary);
   font-size: 14px;
 }
 
@@ -253,27 +271,39 @@ h2 { margin-bottom: 20px; color: #333; }
 
 .tag {
   padding: 4px 12px;
-  background: #f0f0f0;
+  background: var(--bg-tertiary);
   border-radius: 12px;
   font-size: 12px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .tag-primary {
-  background: #e6f7ff;
-  color: #1890ff;
+  background: rgba(13, 148, 136, 0.1);
+  color: var(--primary-color);
 }
 
 .tag-success {
-  background: #f6ffed;
-  color: #52c41a;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
 }
 
 .student-meta {
   display: flex;
   gap: 20px;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meta-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--text-tertiary);
 }
 
 .student-actions {
@@ -281,27 +311,32 @@ h2 { margin-bottom: 20px; color: #333; }
 }
 
 .btn-view {
-  padding: 8px 20px;
-  background: #409eff;
+  padding: 10px 24px;
+  background: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--border-radius);
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all var(--transition-fast);
+  font-weight: 500;
 }
 
 .btn-view:hover {
-  background: #66b1ff;
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
 }
 
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  color: #999;
+  color: var(--text-placeholder);
 }
 
 .empty-icon {
-  font-size: 64px;
-  margin-bottom: 20px;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  color: var(--text-tertiary);
 }
 </style>

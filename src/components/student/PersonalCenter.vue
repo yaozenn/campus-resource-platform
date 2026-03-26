@@ -478,39 +478,47 @@ onMounted(() => {
 }
 
 .btn-edit-profile {
-  padding: 10px 24px;
-  background: var(--color-primary);
-  color: white;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: black;
   border: none;
   border-radius: var(--border-radius);
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.3s ease;
   width: 100%;
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .btn-edit-profile:hover {
-  background: var(--color-primary-hover);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(64, 158, 255, 0.4);
+  color: black;
 }
 
 .btn-change-password {
-  padding: 10px 24px;
-  background: var(--color-success);
-  color: white;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
+  color: black;
   border: none;
   border-radius: var(--border-radius);
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.3s ease;
   width: 100%;
+  box-shadow: 0 4px 12px rgba(103, 194, 58, 0.3);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .btn-change-password:hover {
-  background: var(--color-success-hover);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, var(--color-success-dark) 0%, var(--color-success) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(103, 194, 58, 0.4);
+  color: black;
 }
 
 .info-section {

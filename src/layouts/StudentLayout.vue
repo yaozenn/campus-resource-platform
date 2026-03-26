@@ -1,61 +1,50 @@
 <template>
   <div class="dashboard">
-    <div class="sidebar">
-      <div class="sidebar-brand">
-        <div class="brand-icon">🎓</div>
-        <span class="brand-name">学习中心</span>
+    <!-- 顶部导航栏 - 磨玻璃效果 -->
+    <header class="top-nav glass">
+      <div class="nav-brand">
+        <IconBook class="brand-icon" />
+        <span class="brand-name">校园资源共享平台</span>
       </div>
-
-      <div class="user-card">
-        <div class="user-avatar">{{ userInitial }}</div>
-        <div class="user-meta">
-          <div class="user-name">{{ userName }}</div>
-          <div class="user-points">💎 {{ userPoints }} 积分</div>
-        </div>
-      </div>
-
-      <nav class="sidebar-nav">
-        <!-- 学习资源模块 -->
-        <div class="nav-group">
-          <div class="nav-group-title">学习资源</div>
-          <router-link to="/student/courses">
-            <span class="nav-icon">📚</span>资源浏览
-          </router-link>
-          <router-link to="/student/collections">
-            <span class="nav-icon">⭐</span>收藏管理
-          </router-link>
-        </div>
-        
-        <!-- 交流互动模块 -->
-        <div class="nav-group">
-          <div class="nav-group-title">交流互动</div>
-          <router-link to="/student/forum">
-            <span class="nav-icon">💬</span>论坛
-          </router-link>
-          <router-link to="/student/announcements">
-            <span class="nav-icon">📢</span>公告
-          </router-link>
-        </div>
-        
-        <!-- 个人管理模块 -->
-        <div class="nav-group">
-          <div class="nav-group-title">个人管理</div>
-          <router-link to="/student/points">
-            <span class="nav-icon">🎁</span>我的积分
-          </router-link>
-          <router-link to="/student/personal">
-            <span class="nav-icon">👤</span>个人中心
-          </router-link>
-        </div>
+      
+      <nav class="nav-menu">
+        <router-link to="/student/courses" class="nav-item">
+          <IconBook class="nav-icon" />
+          <span>资源浏览</span>
+        </router-link>
+        <router-link to="/student/collections" class="nav-item">
+          <IconStar class="nav-icon" />
+          <span>收藏</span>
+        </router-link>
+        <router-link to="/student/forum" class="nav-item">
+          <IconForum class="nav-icon" />
+          <span>论坛</span>
+        </router-link>
+        <router-link to="/student/announcements" class="nav-item">
+          <IconAnnouncement class="nav-icon" />
+          <span>公告</span>
+        </router-link>
       </nav>
-
-      <button @click="handleLogout" class="logout-btn">
-        <span>🚪</span> 退出登录
-      </button>
-    </div>
-    <div class="content">
+      
+      <div class="nav-actions">
+        <div class="user-points-badge">
+          <IconStar class="points-icon" />
+          <span>{{ userPoints }} 积分</span>
+        </div>
+        <router-link to="/student/personal" class="user-avatar-link">
+          <div class="user-avatar">{{ userInitial }}</div>
+        </router-link>
+        <button @click="handleLogout" class="logout-btn" title="退出登录">
+          <IconLogout class="logout-icon" />
+        </button>
+      </div>
+    </header>
+    
+    <!-- 主内容区 -->
+    <main class="main-content">
       <router-view />
-    </div>
+    </main>
+    
     <AIAssistantFloating />
   </div>
 </template>
@@ -64,6 +53,13 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import AIAssistantFloating from '../components/student/AIAssistantFloating.vue'
+import { 
+  IconBook, 
+  IconStar, 
+  IconForum, 
+  IconAnnouncement, 
+  IconLogout 
+} from '../components/icons'
 
 const router = useRouter()
 const user = JSON.parse(localStorage.getItem('user') || '{}')
@@ -79,123 +75,156 @@ const handleLogout = () => {
 </script>
 
 <style scoped>
-.dashboard { display: flex; min-height: 100vh; }
-
-.sidebar {
-  width: 240px;
-  background: var(--student-bg);
-  color: white;
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
+.dashboard {
+  min-height: 100vh;
+  background: var(--bg-color);
 }
 
-.sidebar-brand {
+/* 顶部导航栏 - 磨玻璃效果 */
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 22px 20px 18px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  justify-content: space-between;
+  padding: 0 32px;
+  z-index: 1000;
+  border-bottom: 1px solid var(--glass-border);
 }
-.brand-icon { font-size: 24px; }
-.brand-name { font-size: 15px; font-weight: 700; letter-spacing: 0.5px; }
 
-.user-card {
+.nav-brand {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 20px;
-  margin: 12px 12px 8px;
-  background: rgba(255,255,255,0.07);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-md);
-  backdrop-filter: blur(10px);
-}
-.user-avatar {
-  width: 38px; height: 38px;
-  background: linear-gradient(135deg, #409eff, #66b1ff);
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; font-weight: 700; flex-shrink: 0;
-}
-.user-name { font-size: 14px; font-weight: 600; color: #fff; }
-.user-points { font-size: 11px; color: #ffd666; margin-top: 2px; }
-
-.sidebar-nav {
-  flex: 1;
-  padding: 8px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  overflow-y: auto;
-  max-height: calc(100vh - 220px);
 }
 
-.nav-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.brand-icon {
+  width: 32px;
+  height: 32px;
+  color: var(--primary-color);
 }
 
-.nav-group-title {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: rgba(255,255,255,0.5);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 0 16px 8px;
-  margin-top: 8px;
+.brand-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-sf);
+  letter-spacing: -0.5px;
 }
-.sidebar-nav a {
+
+/* 导航菜单 */
+.nav-menu {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  color: rgba(255,255,255,0.65);
+  gap: 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  color: var(--text-secondary);
   text-decoration: none;
   border-radius: var(--border-radius-md);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  transition: all var(--transition-normal);
-  position: relative;
-  overflow: hidden;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all var(--transition-fast);
 }
-.sidebar-nav a:hover {
-  background: rgba(255,255,255,0.08);
-  color: #fff;
-  transform: translateX(4px);
-  box-shadow: var(--shadow-sm);
-}
-.sidebar-nav a.router-link-active {
-  background: linear-gradient(135deg, var(--student-primary), var(--primary-light));
-  color: white;
-  box-shadow: var(--shadow-md);
-  transform: translateX(4px);
-}
-.nav-icon { font-size: 16px; width: 20px; text-align: center; }
 
-.logout-btn {
-  margin: 12px;
-  padding: 12px 16px;
-  background: rgba(245,108,108,0.15);
-  color: #f56c6c;
-  border: 1px solid rgba(245,108,108,0.25);
-  border-radius: var(--border-radius-md);
-  cursor: pointer;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+.nav-item:hover {
+  color: var(--primary-color);
+  background: rgba(13, 148, 136, 0.08);
+}
+
+.nav-item.router-link-active {
+  color: var(--primary-color);
+  background: rgba(13, 148, 136, 0.12);
+}
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* 右侧操作区 */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-points-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: white;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.points-icon {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.user-avatar-link {
+  text-decoration: none;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  transition: all var(--transition-normal);
-  box-shadow: var(--shadow-sm);
-}
-.logout-btn:hover {
-  background: rgba(245,108,108,0.25);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  transition: transform var(--transition-fast);
 }
 
-.content { flex: 1; background: #f4f6fb; overflow-y: auto; min-width: 0; }
+.user-avatar:hover {
+  transform: scale(1.05);
+}
+
+.logout-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.logout-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* 主内容区 */
+.main-content {
+  padding-top: 64px;
+  min-height: 100vh;
+}
 </style>

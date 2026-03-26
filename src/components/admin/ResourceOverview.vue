@@ -1,33 +1,45 @@
 <template>
   <div class="page-container">
     <div class="page-header">
-      <button @click="goBack" class="btn-back">← 返回数据分析</button>
-      <h2>资源总览</h2>
+      <button @click="goBack" class="btn-back">
+        <IconArrowLeft class="btn-icon" />
+        返回数据分析
+      </button>
+      <h2>
+        <IconBookOpen class="header-icon" />
+        资源总览
+      </h2>
     </div>
 
     <!-- 统计卡片 -->
     <div class="stats-summary">
       <div class="summary-card">
+        <div class="summary-icon"><IconBookOpen class="icon-svg" /></div>
         <div class="summary-value">{{ totalResources }}</div>
         <div class="summary-label">总资源数</div>
       </div>
       <div class="summary-card">
+        <div class="summary-icon"><IconCheck class="icon-svg" /></div>
         <div class="summary-value">{{ activeResources }}</div>
         <div class="summary-label">已发布</div>
       </div>
       <div class="summary-card">
+        <div class="summary-icon"><IconClock class="icon-svg" /></div>
         <div class="summary-value">{{ pendingResources }}</div>
         <div class="summary-label">待审核</div>
       </div>
       <div class="summary-card">
+        <div class="summary-icon"><IconClose class="icon-svg" /></div>
         <div class="summary-value">{{ rejectedResources }}</div>
         <div class="summary-label">已拒绝</div>
       </div>
       <div class="summary-card">
+        <div class="summary-icon"><IconDownload class="icon-svg" /></div>
         <div class="summary-value">{{ totalDownloads }}</div>
         <div class="summary-label">总下载次数</div>
       </div>
       <div class="summary-card">
+        <div class="summary-icon"><IconMessage class="icon-svg" /></div>
         <div class="summary-value">{{ totalComments }}</div>
         <div class="summary-label">总评论数</div>
       </div>
@@ -62,8 +74,8 @@
           <div class="resource-title">{{ resource.title }}</div>
           <div class="resource-meta">
             <span class="type-tag">{{ resource.type_name || '未分类' }}</span>
-            <span>💎 {{ resource.points_required }} 积分</span>
-            <span>📥 {{ resource.downloads }} 次下载</span>
+            <span><IconDiamond class="meta-icon-svg" /> {{ resource.points_required }} 积分</span>
+            <span><IconDownload class="meta-icon-svg" /> {{ resource.downloads }} 次下载</span>
             <span :class="['status-tag', resource.status]">{{ getStatusText(resource.status) }}</span>
           </div>
           <div class="resource-uploader">
@@ -79,6 +91,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import { IconBookOpen, IconCheck, IconClock, IconClose, IconDownload, IconMessage, IconArrowLeft, IconDiamond } from '@/components/icons'
 
 const router = useRouter()
 const resources = ref<any[]>([])
@@ -136,76 +149,114 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container { padding: 20px; }
+.page-container { padding: var(--spacing-lg); }
 
 .page-header {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-bottom: 30px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .btn-back {
-  padding: 8px 16px;
-  background: #f0f0f0;
-  border: none;
-  border-radius: 4px;
+  padding: 10px 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--font-size-base);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
 }
 
 .btn-back:hover {
-  background: #e0e0e0;
+  background: var(--bg-tertiary);
+  border-color: var(--primary-color);
 }
+
+.btn-icon { width: 16px; height: 16px; }
 
 .page-header h2 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
+  font-size: var(--h2-font-size);
+  font-weight: var(--h2-font-weight);
+  display: flex;
+  align-items: center;
 }
+
+.header-icon { width: 28px; height: 28px; color: var(--primary-color); margin-right: 10px; }
 
 .stats-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
 
 .summary-card {
-  background: white;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: var(--bg-primary);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
   text-align: center;
+  transition: box-shadow var(--transition-normal);
 }
 
+.summary-card:hover { box-shadow: var(--shadow-md); }
+
+.summary-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--spacing-sm);
+  background: rgba(13, 148, 136, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-svg { width: 24px; height: 24px; color: var(--primary-color); }
+
 .summary-value {
-  font-size: 36px;
-  font-weight: bold;
-  color: #67c23a;
-  margin-bottom: 10px;
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
+  color: var(--primary-color);
+  margin-bottom: 8px;
 }
 
 .summary-label {
-  font-size: 14px;
-  color: #666;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
 }
 
 .resource-section h3 {
-  margin-bottom: 20px;
-  color: #333;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+  font-size: var(--h4-font-size);
+  font-weight: var(--h4-font-weight);
 }
 
 .filter-bar {
   display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
 }
 
 .search-input, .filter-select {
-  padding: 10px 16px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
+  padding: 12px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  background: var(--bg-primary);
+  transition: border-color var(--transition-fast);
+}
+
+.search-input:focus, .filter-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
 }
 
 .search-input {
@@ -219,97 +270,114 @@ onMounted(() => {
 .resource-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: var(--spacing-md);
 }
 
 .resource-card {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: var(--bg-primary);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-normal);
 }
 
+.resource-card:hover { box-shadow: var(--shadow-md); }
+
 .resource-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 12px;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
 }
 
 .resource-meta {
   display: flex;
-  gap: 15px;
+  gap: var(--spacing-md);
   flex-wrap: wrap;
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 10px;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
 }
 
+.resource-meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.meta-icon-svg { width: 14px; height: 14px; }
+
 .type-tag {
-  padding: 3px 10px;
-  background: #f0f0f0;
-  border-radius: 12px;
-  font-size: 12px;
+  padding: 4px 12px;
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
 }
 
 .status-tag {
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
 }
 
 .status-tag.active {
-  background: #f6ffed;
-  color: #52c41a;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success-color);
 }
 
 .status-tag.pending {
-  background: #fff7e6;
-  color: #fa8c16;
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning-color);
 }
 
 .status-tag.rejected {
-  background: #fff1f0;
-  color: #f5222d;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
 }
 
 .resource-uploader {
-  font-size: 14px;
-  color: #999;
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
 }
 
 .type-distribution {
-  margin-bottom: 30px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .type-distribution h3 {
-  margin-bottom: 20px;
-  color: #333;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+  font-size: var(--h4-font-size);
+  font-weight: var(--h4-font-weight);
 }
 
 .type-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
+  gap: var(--spacing-md);
 }
 
 .type-card {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: var(--bg-primary);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
   text-align: center;
+  transition: box-shadow var(--transition-normal);
 }
+
+.type-card:hover { box-shadow: var(--shadow-md); }
 
 .type-value {
   font-size: 24px;
-  font-weight: bold;
-  color: #409eff;
+  font-weight: var(--font-weight-bold);
+  color: var(--primary-color);
   margin-bottom: 8px;
 }
 
 .type-label {
-  font-size: 14px;
-  color: #666;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
 }
 </style>

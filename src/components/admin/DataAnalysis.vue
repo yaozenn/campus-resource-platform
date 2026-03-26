@@ -1,32 +1,43 @@
 <template>
   <div class="page-container">
-    <h2>数据分析</h2>
+    <h2>
+      <IconClipboard class="header-icon" />
+      数据分析
+    </h2>
 
     <!-- 统计卡片 -->
     <div class="stats-grid">
       <div class="stat-card primary" @click="goToUserOverview">
-        <div class="stat-icon">👥</div>
+        <div class="stat-icon">
+          <IconUsers class="icon-svg" />
+        </div>
         <div class="stat-body">
           <div class="stat-num">{{ stats.totalUsers }}</div>
           <div class="stat-label">用户总数</div>
         </div>
       </div>
       <div class="stat-card success" @click="goToResourceOverview">
-        <div class="stat-icon">📚</div>
+        <div class="stat-icon">
+          <IconBookOpen class="icon-svg" />
+        </div>
         <div class="stat-body">
           <div class="stat-num">{{ stats.totalCourses }}</div>
           <div class="stat-label">资源总数</div>
         </div>
       </div>
       <div class="stat-card warning" @click="goToForumOverview">
-        <div class="stat-icon">💬</div>
+        <div class="stat-icon">
+          <IconMessageCircle class="icon-svg" />
+        </div>
         <div class="stat-body">
           <div class="stat-num">{{ stats.totalPosts }}</div>
           <div class="stat-label">论坛帖子</div>
         </div>
       </div>
       <div class="stat-card danger">
-        <div class="stat-icon">🎁</div>
+        <div class="stat-icon">
+          <IconGift class="icon-svg" />
+        </div>
         <div class="stat-body">
           <div class="stat-num">{{ stats.totalPoints }}</div>
           <div class="stat-label">积分总量</div>
@@ -146,6 +157,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import { IconUsers, IconBookOpen, IconMessageCircle, IconGift, IconClipboard } from '@/components/icons'
 
 const router = useRouter()
 
@@ -264,7 +276,35 @@ onMounted(fetchStats)
 .stat-card.success { border-left-color: var(--success-color); }
 .stat-card.warning { border-left-color: var(--warning-color); }
 .stat-card.danger { border-left-color: var(--danger-color); }
-.stat-icon { font-size: 36px; }
+.stat-icon { 
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(13, 148, 136, 0.1);
+}
+.stat-card.primary .stat-icon { background: rgba(13, 148, 136, 0.15); }
+.stat-card.success .stat-icon { background: rgba(16, 185, 129, 0.15); }
+.stat-card.warning .stat-icon { background: rgba(245, 158, 11, 0.15); }
+.stat-card.danger .stat-icon { background: rgba(239, 68, 68, 0.15); }
+.icon-svg { 
+  width: 24px; 
+  height: 24px; 
+  color: var(--primary-color);
+}
+.stat-card.primary .icon-svg { color: var(--primary-color); }
+.stat-card.success .icon-svg { color: var(--success-color); }
+.stat-card.warning .icon-svg { color: var(--warning-color); }
+.stat-card.danger .icon-svg { color: var(--danger-color); }
+.header-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--primary-color);
+  margin-right: 10px;
+  vertical-align: middle;
+}
 .stat-num { font-size: 30px; font-weight: var(--font-weight-bold); color: var(--text-primary); line-height: 1; }
 .stat-label { font-size: var(--font-size-sm); color: var(--text-placeholder); margin-top: 6px; }
 

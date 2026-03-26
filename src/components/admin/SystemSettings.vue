@@ -9,7 +9,7 @@
       <!-- 基本设置 -->
       <el-tab-pane label="基本设置" name="basic">
         <div class="setting-card">
-          <h3 class="card-title">🌐 网站基本信息</h3>
+          <h3 class="card-title"><IconGlobe class="title-icon" /> 网站基本信息</h3>
           <div class="form-grid">
             <div class="form-group">
               <label>网站名称</label>
@@ -33,7 +33,7 @@
       <!-- 注册设置 -->
       <el-tab-pane label="注册设置" name="register">
         <div class="setting-card">
-          <h3 class="card-title">📝 注册配置</h3>
+          <h3 class="card-title"><IconEdit class="title-icon" /> 注册配置</h3>
           <div class="form-grid">
             <div class="form-group">
               <label>默认注册角色</label>
@@ -62,11 +62,11 @@
       <!-- 积分设置 -->
       <el-tab-pane label="积分规则" name="points">
         <div class="setting-card">
-          <h3 class="card-title">🎯 积分奖励规则</h3>
+          <h3 class="card-title"><IconStar class="title-icon" /> 积分奖励规则</h3>
           <div class="points-rules">
             <div class="rule-item">
               <div class="rule-info">
-                <span class="rule-icon">📅</span>
+                <span class="rule-icon-svg"><IconCalendar class="icon-svg" /></span>
                 <div>
                   <div class="rule-name">每日签到</div>
                   <div class="rule-desc">用户每日签到奖励积分</div>
@@ -79,7 +79,7 @@
             </div>
             <div class="rule-item">
               <div class="rule-info">
-                <span class="rule-icon">📤</span>
+                <span class="rule-icon-svg"><IconUpload class="icon-svg" /></span>
                 <div>
                   <div class="rule-name">上传资源</div>
                   <div class="rule-desc">老师上传课程资源奖励</div>
@@ -92,7 +92,7 @@
             </div>
             <div class="rule-item">
               <div class="rule-info">
-                <span class="rule-icon">💬</span>
+                <span class="rule-icon-svg"><IconMessageCircle class="icon-svg" /></span>
                 <div>
                   <div class="rule-name">发表帖子</div>
                   <div class="rule-desc">在论坛发表帖子奖励</div>
@@ -105,7 +105,7 @@
             </div>
             <div class="rule-item">
               <div class="rule-info">
-                <span class="rule-icon">✏️</span>
+                <span class="rule-icon-svg"><IconEdit class="icon-svg" /></span>
                 <div>
                   <div class="rule-name">发表评论</div>
                   <div class="rule-desc">评论资源或帖子奖励</div>
@@ -126,7 +126,7 @@
       <!-- 安全设置 -->
       <el-tab-pane label="安全设置" name="security">
         <div class="setting-card">
-          <h3 class="card-title">🔒 安全选项</h3>
+          <h3 class="card-title"><IconLock class="title-icon" /> 安全选项</h3>
           <div class="form-grid">
             <div class="form-group">
               <label>密码最小长度</label>
@@ -152,7 +152,7 @@
       <!-- 邮件设置 -->
       <el-tab-pane label="邮件设置" name="email">
         <div class="setting-card">
-          <h3 class="card-title">📧 SMTP 邮件配置</h3>
+          <h3 class="card-title"><IconEmail class="title-icon" /> SMTP 邮件配置</h3>
           <div class="form-grid">
             <div class="form-group">
               <label>SMTP 服务器</label>
@@ -180,7 +180,7 @@
       <!-- 通知设置 -->
       <el-tab-pane label="通知设置" name="notification">
         <div class="setting-card">
-          <h3 class="card-title">🔔 通知配置</h3>
+          <h3 class="card-title"><IconBell class="title-icon" /> 通知配置</h3>
           <div class="form-grid">
             <div class="form-group">
               <label>通知保留天数</label>
@@ -206,7 +206,7 @@
       <!-- 数据设置 -->
       <el-tab-pane label="数据管理" name="data">
         <div class="setting-card">
-          <h3 class="card-title">💾 数据管理</h3>
+          <h3 class="card-title"><IconDatabase class="title-icon" /> 数据管理</h3>
           <div class="form-grid">
             <div class="form-group">
               <label>备份频率</label>
@@ -240,6 +240,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import axios from 'axios'
+import { IconGlobe, IconEdit, IconStar, IconCalendar, IconUpload, IconMessageCircle, IconLock, IconEmail, IconBell, IconDatabase } from '@/components/icons'
 
 const activeTab = ref('basic')
 const saveStatus = ref('')
@@ -288,19 +289,19 @@ const saveSection = async () => {
       headers: { Authorization: `Bearer ${token}` }
     })
     if (res.data.success) {
-      saveStatus.value = '✅ 已保存'
+      saveStatus.value = '已保存'
       setTimeout(() => saveStatus.value = '', 2500)
     }
   } catch (e) {
-    saveStatus.value = '❌ 保存失败'
+    saveStatus.value = '保存失败'
     setTimeout(() => saveStatus.value = '', 2500)
   }
 }
 
 const backupNow = () => {
-  saveStatus.value = '⏳ 备份中...'
+  saveStatus.value = '备份中...'
   setTimeout(() => {
-    saveStatus.value = '✅ 备份完成'
+    saveStatus.value = '备份完成'
     setTimeout(() => saveStatus.value = '', 2500)
   }, 1200)
 }
@@ -405,6 +406,9 @@ onMounted(loadSettings)
 .rule-item:hover { border-color: #c6e2ff; }
 .rule-info { display: flex; align-items: center; gap: 14px; }
 .rule-icon { font-size: 28px; }
+.title-icon { width: 20px; height: 20px; margin-right: 8px; vertical-align: middle; }
+.rule-icon-svg { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(13, 148, 136, 0.1); border-radius: 8px; }
+.rule-icon-svg .icon-svg { width: 18px; height: 18px; color: var(--primary-color); }
 .rule-name { font-weight: 600; color: #303133; font-size: 14px; }
 .rule-desc { font-size: 12px; color: #909399; margin-top: 2px; }
 .rule-input { display: flex; align-items: center; gap: 8px; }

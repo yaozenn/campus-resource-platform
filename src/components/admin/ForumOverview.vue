@@ -1,25 +1,35 @@
 <template>
   <div class="page-container">
     <div class="page-header">
-      <button @click="goBack" class="btn-back">← 返回数据分析</button>
-      <h2>论坛帖子总览</h2>
+      <button @click="goBack" class="btn-back">
+        <IconArrowLeft class="btn-icon" />
+        返回数据分析
+      </button>
+      <h2>
+        <IconMessageCircle class="header-icon" />
+        论坛帖子总览
+      </h2>
     </div>
 
     <!-- 统计卡片 -->
     <div class="stats-summary">
       <div class="summary-card">
+        <div class="summary-icon"><IconMessageCircle class="icon-svg" /></div>
         <div class="summary-value">{{ totalPosts }}</div>
         <div class="summary-label">总帖子数</div>
       </div>
       <div class="summary-card">
+        <div class="summary-icon"><IconMessage class="icon-svg" /></div>
         <div class="summary-value">{{ totalComments }}</div>
         <div class="summary-label">总评论数</div>
       </div>
       <div class="summary-card">
+        <div class="summary-icon"><IconFlame class="icon-svg" /></div>
         <div class="summary-value">{{ activePosts }}</div>
         <div class="summary-label">活跃帖子</div>
       </div>
       <div class="summary-card">
+        <div class="summary-icon"><IconUser class="icon-svg" /></div>
         <div class="summary-value">{{ topPostAuthor }}</div>
         <div class="summary-label">最高产作者</div>
       </div>
@@ -36,9 +46,9 @@
         <div v-for="post in filteredPosts" :key="post.id" class="post-card">
           <div class="post-title">{{ post.title }}</div>
           <div class="post-meta">
-            <span>👤 {{ post.author?.name || post.author?.username || '未知' }}</span>
-            <span>📅 {{ formatTime(post.post_date) }}</span>
-            <span>💬 {{ post.comment_count || 0 }} 评论</span>
+            <span><IconUserCircle class="meta-icon-svg" /> {{ post.author?.name || post.author?.username || '未知' }}</span>
+            <span><IconCalendar class="meta-icon-svg" /> {{ formatTime(post.post_date) }}</span>
+            <span><IconMessage class="meta-icon-svg" /> {{ post.comment_count || 0 }} 评论</span>
           </div>
           <div class="post-content">{{ post.content }}</div>
         </div>
@@ -52,6 +62,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { formatTime } from '../../utils/timeFormat'
+import { IconMessageCircle, IconMessage, IconFlame, IconUser, IconArrowLeft, IconUserCircle, IconCalendar } from '@/components/icons'
 
 const router = useRouter()
 const posts = ref<any[]>([])
@@ -107,108 +118,158 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container { padding: 20px; }
+.page-container { padding: var(--spacing-lg); }
 
 .page-header {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-bottom: 30px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .btn-back {
-  padding: 8px 16px;
-  background: #f0f0f0;
-  border: none;
-  border-radius: 4px;
+  padding: 10px 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--font-size-base);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
 }
 
 .btn-back:hover {
-  background: #e0e0e0;
+  background: var(--bg-tertiary);
+  border-color: var(--primary-color);
 }
+
+.btn-icon { width: 16px; height: 16px; }
 
 .page-header h2 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
+  font-size: var(--h2-font-size);
+  font-weight: var(--h2-font-weight);
+  display: flex;
+  align-items: center;
 }
+
+.header-icon { width: 28px; height: 28px; color: var(--primary-color); margin-right: 10px; }
 
 .stats-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
 
 .summary-card {
-  background: white;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: var(--bg-primary);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
   text-align: center;
+  transition: box-shadow var(--transition-normal);
 }
 
+.summary-card:hover { box-shadow: var(--shadow-md); }
+
+.summary-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--spacing-sm);
+  background: rgba(13, 148, 136, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-svg { width: 24px; height: 24px; color: var(--primary-color); }
+
 .summary-value {
-  font-size: 36px;
-  font-weight: bold;
-  color: #f56c6c;
-  margin-bottom: 10px;
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
+  color: var(--primary-color);
+  margin-bottom: 8px;
 }
 
 .summary-label {
-  font-size: 14px;
-  color: #666;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
 }
 
 .post-section h3 {
-  margin-bottom: 20px;
-  color: #333;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+  font-size: var(--h4-font-size);
+  font-weight: var(--h4-font-weight);
 }
 
 .filter-bar {
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-md);
 }
 
 .search-input {
   width: 100%;
-  padding: 10px 16px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
+  max-width: 400px;
+  padding: 12px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  background: var(--bg-primary);
+  transition: border-color var(--transition-fast);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
 }
 
 .post-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: var(--spacing-md);
 }
 
 .post-card {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: var(--bg-primary);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-normal);
 }
 
+.post-card:hover { box-shadow: var(--shadow-md); }
+
 .post-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 12px;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
 }
 
 .post-meta {
   display: flex;
-  gap: 15px;
-  font-size: 14px;
-  color: #999;
-  margin-bottom: 10px;
+  gap: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
 }
 
+.post-meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.meta-icon-svg { width: 14px; height: 14px; }
+
 .post-content {
-  font-size: 14px;
-  color: #666;
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
   line-height: 1.6;
   display: -webkit-box;
   -webkit-line-clamp: 2;

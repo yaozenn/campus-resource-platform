@@ -7,15 +7,24 @@
         <div class="resource-title">{{ resource.title }}</div>
         <div class="resource-meta">
           <span class="tag">{{ resource.type?.name || '未分类' }}</span>
-          <span class="comment-count">💬 {{ resource.comment_count || 0 }} 条评论</span>
+          <span class="comment-count">
+            <IconMessage class="comment-icon" />
+            {{ resource.comment_count || 0 }} 条评论
+          </span>
         </div>
       </div>
-      <div v-if="resources.length === 0" class="empty-state">暂无资源</div>
+      <div v-if="resources.length === 0" class="empty-state">
+        <IconFolder class="empty-icon" />
+        <p>暂无资源</p>
+      </div>
     </div>
 
     <div v-else class="comment-section">
       <div class="back-bar">
-        <button @click="selectedResource = null" class="btn-back">← 返回列表</button>
+        <button @click="selectedResource = null" class="btn-back">
+          <IconArrowLeft class="back-icon" />
+          返回列表
+        </button>
         <span class="resource-name">{{ selectedResource.title }}</span>
       </div>
 
@@ -36,7 +45,10 @@
             <button @click="submitReply(comment)" class="btn-reply">回复</button>
           </div>
         </div>
-        <div v-if="comments.length === 0" class="empty-state">该资源暂无评论</div>
+        <div v-if="comments.length === 0" class="empty-state">
+          <IconMessage class="empty-icon" />
+          <p>该资源暂无评论</p>
+        </div>
       </div>
     </div>
   </div>
@@ -45,6 +57,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import { IconMessage, IconFolder, IconArrowLeft } from '../../components/icons'
 
 const resources = ref<any[]>([])
 const selectedResource = ref<any>(null)
@@ -100,26 +113,131 @@ onMounted(fetchResources)
 
 <style scoped>
 .page-container { padding: 20px; }
+h2 { color: var(--text-primary); font-family: var(--font-sf); margin-bottom: 20px; }
 .resource-list { display: flex; flex-direction: column; gap: 12px; }
-.resource-item { background: white; padding: 16px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
-.resource-item:hover { box-shadow: 0 4px 12px rgba(64,158,255,0.2); border-left: 3px solid #409eff; }
-.resource-title { font-weight: 600; color: #333; }
+.resource-item { 
+  background: white; 
+  padding: 16px 20px; 
+  border-radius: var(--border-radius-lg); 
+  box-shadow: var(--shadow-sm); 
+  cursor: pointer; 
+  transition: all var(--transition-fast); 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  border: 1px solid var(--border-light);
+}
+.resource-item:hover { 
+  box-shadow: var(--shadow-md); 
+  border-left: 3px solid var(--primary-color); 
+}
+.resource-title { font-weight: 600; color: var(--text-primary); }
 .resource-meta { display: flex; gap: 12px; align-items: center; }
-.tag { background: #e6f7ff; color: #1890ff; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
-.comment-count { color: #999; font-size: 13px; }
-.back-bar { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
-.btn-back { padding: 6px 14px; background: #f4f4f5; border: none; border-radius: 4px; cursor: pointer; color: #606266; }
-.resource-name { font-weight: 600; font-size: 16px; color: #333; }
+.tag { 
+  background: rgba(13, 148, 136, 0.1); 
+  color: var(--primary-color); 
+  padding: 4px 12px; 
+  border-radius: 20px; 
+  font-size: 12px; 
+  font-weight: 500;
+}
+.comment-count { 
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-tertiary); 
+  font-size: 13px; 
+}
+.comment-icon {
+  width: 16px;
+  height: 16px;
+}
+.back-bar { 
+  display: flex; 
+  align-items: center; 
+  gap: 16px; 
+  margin-bottom: 20px; 
+}
+.btn-back { 
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px; 
+  background: var(--bg-tertiary); 
+  border: none; 
+  border-radius: var(--border-radius); 
+  cursor: pointer; 
+  color: var(--text-secondary); 
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+.btn-back:hover {
+  background: var(--bg-secondary);
+  color: var(--primary-color);
+}
+.back-icon {
+  width: 16px;
+  height: 16px;
+}
+.resource-name { font-weight: 600; font-size: 16px; color: var(--text-primary); }
 .comment-list { display: flex; flex-direction: column; gap: 16px; }
-.comment-item { background: white; padding: 16px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.comment-item { 
+  background: white; 
+  padding: 16px 20px; 
+  border-radius: var(--border-radius-lg); 
+  box-shadow: var(--shadow-sm); 
+  border: 1px solid var(--border-light);
+}
 .comment-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
-.comment-user { font-weight: 600; color: #333; }
-.comment-time { color: #999; font-size: 13px; }
-.comment-content { color: #555; line-height: 1.6; margin-bottom: 12px; }
-.reply-box { background: #f0f9eb; border-left: 3px solid #67c23a; padding: 10px 14px; border-radius: 4px; color: #555; }
-.reply-label { color: #67c23a; font-weight: 600; margin-right: 6px; }
+.comment-user { font-weight: 600; color: var(--text-primary); }
+.comment-time { color: var(--text-tertiary); font-size: 13px; }
+.comment-content { color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px; }
+.reply-box { 
+  background: rgba(16, 185, 129, 0.05); 
+  border-left: 3px solid var(--success-color); 
+  padding: 10px 14px; 
+  border-radius: 4px; 
+  color: var(--text-secondary); 
+}
+.reply-label { color: var(--success-color); font-weight: 600; margin-right: 6px; }
 .reply-input-area { display: flex; gap: 10px; align-items: flex-end; }
-.reply-input-area textarea { flex: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; resize: none; font-size: 14px; }
-.btn-reply { padding: 8px 20px; background: #409eff; color: white; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap; }
-.empty-state { text-align: center; padding: 40px; color: #999; }
+.reply-input-area textarea { 
+  flex: 1; 
+  padding: 10px 14px; 
+  border: 1px solid var(--border-color); 
+  border-radius: var(--border-radius); 
+  resize: none; 
+  font-size: 14px; 
+  transition: all var(--transition-fast);
+}
+.reply-input-area textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+.btn-reply { 
+  padding: 10px 24px; 
+  background: var(--primary-color); 
+  color: white; 
+  border: none; 
+  border-radius: var(--border-radius); 
+  cursor: pointer; 
+  white-space: nowrap; 
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+.btn-reply:hover {
+  background: var(--primary-dark);
+}
+.empty-state { 
+  text-align: center; 
+  padding: 40px; 
+  color: var(--text-tertiary); 
+}
+.empty-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  color: var(--text-tertiary);
+}
 </style>
