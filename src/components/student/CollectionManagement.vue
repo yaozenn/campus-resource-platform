@@ -43,7 +43,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { formatDateTime } from '../../utils/timeFormat'
-import { IconCollection, IconDiamond, IconDownload, IconClock, IconClose, IconBook } from '../icons'
+import { IconCollection, IconDiamond, IconDownload, IconClock, IconClose, IconBook } from '@/components/icons'
 
 const router = useRouter()
 const collections = ref<any[]>([])

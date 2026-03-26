@@ -70,7 +70,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
-import { IconBell, IconPlus, IconRefresh, IconEdit, IconDelete } from '../icons'
+import { IconBell, IconPlus, IconRefresh, IconEdit, IconDelete } from '@/components/icons'
 
 const announcements = ref<any[]>([])
 const showAddDialog = ref(false)

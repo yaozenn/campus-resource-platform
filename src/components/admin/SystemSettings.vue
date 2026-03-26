@@ -240,7 +240,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import axios from 'axios'
-import { IconGlobe, IconEdit, IconStar, IconCalendar, IconUpload, IconMessageCircle, IconLock, IconEmail, IconBell, IconDatabase } from '../icons'
+import { IconGlobe, IconEdit, IconStar, IconCalendar, IconUpload, IconMessageCircle, IconLock, IconEmail, IconBell, IconDatabase } from '@/components/icons'
 
 const activeTab = ref('basic')
 const saveStatus = ref('')

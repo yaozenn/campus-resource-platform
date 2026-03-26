@@ -32,7 +32,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { formatDateTime } from '../../utils/timeFormat'
-import { IconBell, IconUser, IconCalendar, IconInbox } from '../icons'
+import { IconBell, IconUser, IconCalendar, IconInbox } from '@/components/icons'
 
 const router = useRouter()
 const announcements = ref<any[]>([])

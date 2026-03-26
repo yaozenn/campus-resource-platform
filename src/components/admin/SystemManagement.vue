@@ -58,7 +58,7 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { IconSettings, IconBookOpen, IconMessageCircle, IconBell, IconClipboard, IconGift } from '../icons'
+import { IconSettings, IconBookOpen, IconMessageCircle, IconBell, IconClipboard, IconGift } from '@/components/icons'
 
 const router = useRouter()
 

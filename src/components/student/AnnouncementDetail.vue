@@ -36,7 +36,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import { formatDateTime } from '../../utils/timeFormat'
-import { IconArrowLeft, IconUser, IconCalendar, IconTrash } from '../icons'
+import { IconArrowLeft, IconUser, IconCalendar, IconTrash } from '@/components/icons'
 
 const route = useRoute()
 const router = useRouter()

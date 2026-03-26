@@ -62,7 +62,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { formatTime } from '../../utils/timeFormat'
-import { IconMessageCircle, IconMessage, IconFlame, IconUser, IconArrowLeft, IconUserCircle, IconCalendar } from '../icons'
+import { IconMessageCircle, IconMessage, IconFlame, IconUser, IconArrowLeft, IconUserCircle, IconCalendar } from '@/components/icons'
 
 const router = useRouter()
 const posts = ref<any[]>([])
