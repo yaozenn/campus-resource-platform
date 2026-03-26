@@ -6,14 +6,16 @@
     </div>
     
     <div v-else-if="!course" class="empty-state">
-      <div class="empty-icon">📭</div>
+      <div class="empty-icon">
+        <IconInbox class="empty-icon-svg" />
+      </div>
       <p>资源不存在</p>
       <button @click="goBack" class="btn-back">返回</button>
     </div>
     
     <div v-else class="detail-page">
       <div class="back-btn" @click="goBack">
-        <span>←</span> 返回列表
+        <IconArrowLeft class="back-icon" /> 返回列表
       </div>
       
       <div class="detail-content">
@@ -270,16 +272,37 @@ const toggleCollect = async () => {
 
 const downloadCourse = async () => {
   try {
+    // 检查是否有文件URL
+    if (!course.value?.file_url) {
+      alert('该资源暂无下载链接')
+      return
+    }
+
     const token = localStorage.getItem('token')
+    
+    // 先调用下载统计API
     await axios.post(
       `http://127.0.0.1:8000/api/courses/${course.value.id}/download/`,
       {},
       { headers: { Authorization: `Bearer ${token}` } }
     )
+    
+    // 增加本地下载计数
     course.value.downloads += 1
-    alert('下载成功！')
+    
+    // 创建隐藏的a标签进行真实下载
+    const link = document.createElement('a')
+    link.href = course.value.file_url
+    link.target = '_blank'
+    link.download = course.value.title || 'download'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    alert('下载已开始！')
   } catch (error: any) {
-    alert(error.response?.data?.error || '下载失败')
+    console.error('下载失败:', error)
+    alert(error.response?.data?.error || '下载失败，请稍后重试')
   }
 }
 

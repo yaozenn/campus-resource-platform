@@ -28,3 +28,10 @@ export function formatDate(dateString: string): string {
   
   return `${year}年${month}月${day}日`
 }
+
+/**
+ * 格式化日期时间为 xxxx年x月x日 xx:xx:xx 格式（与formatTime相同，用于兼容）
+ */
+export function formatDateTime(dateString: string): string {
+  return formatTime(dateString)
+}

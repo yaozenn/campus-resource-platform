@@ -66,13 +66,60 @@
         <p>暂无学生</p>
       </div>
     </div>
+
+    <!-- 学生详情弹窗 -->
+    <div v-if="showDetailDialog" class="dialog-overlay" @click="closeDetailDialog">
+      <div class="dialog-content" @click.stop>
+        <div class="dialog-header">
+          <h3>学生详情</h3>
+          <button class="btn-close" @click="closeDetailDialog">
+            <IconClose class="close-icon" />
+          </button>
+        </div>
+        <div v-if="selectedStudent" class="dialog-body">
+          <div class="detail-avatar">
+            {{ selectedStudent.name.charAt(0) }}
+          </div>
+          <div class="detail-name">{{ selectedStudent.name }}</div>
+          <div class="detail-username">@{{ selectedStudent.username }}</div>
+          
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label"><IconUser class="detail-icon" /> 性别</span>
+              <span class="detail-value">{{ getGenderText(selectedStudent.gender) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label"><IconBookOpen class="detail-icon" /> 专业</span>
+              <span class="detail-value">{{ selectedStudent.major || '未设置' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label"><IconGraduationCap class="detail-icon" /> 年级</span>
+              <span class="detail-value">{{ selectedStudent.grade }}级</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label"><IconEmail class="detail-icon" /> 邮箱</span>
+              <span class="detail-value">{{ selectedStudent.email || '未设置' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label"><IconPhone class="detail-icon" /> 电话</span>
+              <span class="detail-value">{{ selectedStudent.phone || '未设置' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label"><IconCalendar class="detail-icon" /> 注册时间</span>
+              <span class="detail-value">{{ selectedStudent.date_joined ? formatDateTime(selectedStudent.date_joined) : '未知' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
-import { IconEmail, IconPhone, IconUser } from '../../components/icons'
+import { IconEmail, IconPhone, IconUser, IconClose, IconBookOpen, IconGraduationCap, IconCalendar } from '../../components/icons'
+import { formatDateTime } from '../../utils/timeFormat'
 
 const students = ref<any[]>([])
 const searchText = ref('')
@@ -135,8 +182,17 @@ const fetchStudents = async () => {
   }
 }
 
+const selectedStudent = ref<any>(null)
+const showDetailDialog = ref(false)
+
 const viewStudent = (student: any) => {
-  alert(`查看学生详情：${student.name}\n学号：${student.username}\n专业：${student.major}\n年级：${student.grade}`)
+  selectedStudent.value = student
+  showDetailDialog.value = true
+}
+
+const closeDetailDialog = () => {
+  showDetailDialog.value = false
+  selectedStudent.value = null
 }
 
 onMounted(() => {
@@ -338,5 +394,135 @@ h2 { margin-bottom: 20px; color: var(--text-primary); font-family: var(--font-sf
   height: 64px;
   margin: 0 auto 20px;
   color: var(--text-tertiary);
+}
+
+/* 详情弹窗样式 */
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dialog-content {
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-lg);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.dialog-header h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--text-tertiary);
+  transition: color var(--transition-fast);
+}
+
+.btn-close:hover {
+  color: var(--text-primary);
+}
+
+.close-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.dialog-body {
+  padding: var(--spacing-xl);
+  text-align: center;
+}
+
+.detail-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 auto var(--spacing-md);
+}
+
+.detail-name {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.detail-username {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+  text-align: left;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius-md);
+}
+
+.detail-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.detail-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.detail-value {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+@media (max-width: 480px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

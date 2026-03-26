@@ -288,38 +288,15 @@ const fetchCourseTypes = async () => {
 const fetchCourses = async () => {
   try {
     const token = localStorage.getItem('token')
-    const user = JSON.parse(localStorage.getItem('user') || '{}')
     
-    // 获取学生信息，包括他们的老师(supervisor)
-    let supervisorId = null
-    if (user.role === 'student') {
-      try {
-        const studentRes = await axios.get(`http://127.0.0.1:8000/api/auth/students/${user.id}/`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        supervisorId = studentRes.data.supervisor
-      } catch (e) {
-        console.log('无法获取学生老师信息')
-      }
-    }
-    
-    // 获取所有课程
+    // 获取所有已审核通过的课程
     const response = await axios.get('http://127.0.0.1:8000/api/courses/', {
       headers: { Authorization: `Bearer ${token}` }
     })
     
-    // 过滤课程：公开课程 或 自己老师的课程
+    // 只显示状态为 active 或 approved 的资源
     courses.value = response.data.filter((course: any) => {
-      // 公开课程对所有学生可见
-      if (course.visibility === 'public' || !course.visibility) {
-        return true
-      }
-      // 仅老师学生可见的课程
-      if (course.visibility === 'students_only') {
-        // 如果课程上传者是学生的老师，则可见
-        return supervisorId && course.uploader?.id === supervisorId
-      }
-      return true
+      return course.status === 'active' || course.status === 'approved'
     })
   } catch (error) {
     console.error('获取课程列表失败', error)

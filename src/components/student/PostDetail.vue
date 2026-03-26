@@ -1,30 +1,32 @@
 <template>
   <div class="page-container">
     <div class="back-btn" @click="goBack">
-      <span>←</span> 返回论坛
+      <IconArrowLeft class="back-icon" /> 返回论坛
     </div>
     
     <div v-if="post" class="post-detail">
       <div class="post-header">
         <div class="post-title-section">
           <h1 class="post-title">{{ post.title }}</h1>
-          <span v-if="isHot" class="hot-tag">🔥 热门</span>
+          <span v-if="isHot" class="hot-tag">
+            <IconFlame class="hot-icon" /> 热门
+          </span>
         </div>
         <div class="post-meta">
           <div class="meta-row">
-            <span class="meta-icon">👤</span>
+            <IconUser class="meta-icon-svg" />
             <span class="meta-text">{{ post.author?.name || post.author?.username }}</span>
           </div>
           <div class="meta-row">
-            <span class="meta-icon">📅</span>
-            <span class="meta-text">{{ formatTime(post.post_date) }}</span>
+            <IconCalendar class="meta-icon-svg" />
+            <span class="meta-text">{{ formatDateTime(post.post_date) }}</span>
           </div>
           <div class="meta-row">
-            <span class="meta-icon">👁️</span>
+            <IconEye class="meta-icon-svg" />
             <span class="meta-text">{{ post.views || 0 }} 次浏览</span>
           </div>
           <div class="meta-row">
-            <span class="meta-icon">💬</span>
+            <IconMessage class="meta-icon-svg" />
             <span class="meta-text">{{ comments.length }} 条评论</span>
           </div>
           <span class="visible-tag">{{ getVisibleText(post.visible_to) }}</span>
@@ -41,13 +43,13 @@
           @click="deletePost" 
           class="btn-delete"
         >
-          <span>🗑️</span> 删除帖子
+          <IconTrash class="btn-icon" /> 删除帖子
         </button>
       </div>
       
       <div class="comments-section">
         <div class="comments-header">
-          <h3>💬 评论区</h3>
+          <h3><IconMessage class="section-icon" /> 评论区</h3>
           <span class="comment-count">{{ comments.length }} 条评论</span>
         </div>
         
@@ -63,7 +65,7 @@
               <div class="comment-header">
                 <div class="comment-author-section">
                   <span class="comment-author">{{ comment.author?.name || comment.author?.username }}</span>
-                  <span class="comment-date">{{ formatTime(comment.comment_date) }}</span>
+                  <span class="comment-date">{{ formatDateTime(comment.comment_date) }}</span>
                 </div>
               </div>
               <div class="comment-content">
@@ -72,7 +74,9 @@
             </div>
           </div>
           <div v-if="comments.length === 0" class="empty-state">
-            <div class="empty-icon">📭</div>
+            <div class="empty-icon">
+              <IconInbox class="empty-icon-svg" />
+            </div>
             <p>暂无评论，快来抢沙发吧！</p>
           </div>
         </div>
@@ -107,7 +111,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
-import { formatTime } from '../../utils/timeFormat'
+import { formatTime, formatDateTime } from '../../utils/timeFormat'
+import { IconArrowLeft, IconFlame, IconUser, IconCalendar, IconEye, IconMessage, IconTrash, IconInbox } from '../icons'
 
 const route = useRoute()
 const router = useRouter()
@@ -322,6 +327,40 @@ onMounted(() => {
 
 .meta-icon {
   font-size: var(--font-size-base);
+}
+
+.back-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.meta-icon-svg {
+  width: 16px;
+  height: 16px;
+  color: var(--text-secondary);
+}
+
+.hot-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.btn-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.section-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.empty-icon-svg {
+  width: 64px;
+  height: 64px;
+  color: var(--text-placeholder);
 }
 
 .meta-text {

@@ -1,28 +1,37 @@
 <template>
   <div class="page-container">
-    <h2>收藏管理</h2>
+    <h2>
+      <IconCollection class="header-icon" />
+      收藏管理
+    </h2>
 
     <div v-if="collections.length > 0" class="collection-grid">
-      <div v-for="item in collections" :key="item.id" class="collection-card">
+      <div v-for="item in collections" :key="item.id" class="collection-card" @click="viewResource(item.resource)">
         <div class="card-top">
           <span class="type-tag">{{ item.resource?.type?.name || '未分类' }}</span>
-          <span class="points-badge">💎 {{ item.resource?.points_required ?? 0 }} 积分</span>
+          <span class="points-badge">
+            <IconDiamond class="badge-icon" /> {{ item.resource?.points_required ?? 0 }} 积分
+          </span>
         </div>
         <h3 class="card-title">{{ item.resource?.title || '未知资源' }}</h3>
         <p class="card-desc">{{ item.resource?.description || '暂无描述' }}</p>
         <div class="card-meta">
-          <span>📥 {{ item.resource?.downloads ?? 0 }} 次下载</span>
-          <span>🕐 {{ formatDate(item.collect_date) }}</span>
+          <span><IconDownload class="meta-icon" /> {{ item.resource?.downloads ?? 0 }} 次下载</span>
+          <span><IconClock class="meta-icon" /> {{ formatDateTime(item.collect_date) }}</span>
         </div>
-        <div class="card-actions">
-          <button @click="downloadResource(item.resource)" class="btn-download">下载</button>
-          <button @click="uncollect(item)" class="btn-uncollect">取消收藏</button>
+        <div class="card-actions" @click.stop>
+          <button @click="downloadResource(item.resource)" class="btn-download">
+            <IconDownload class="btn-icon" /> 下载
+          </button>
+          <button @click="uncollect(item)" class="btn-uncollect">
+            <IconClose class="btn-icon" /> 取消收藏
+          </button>
         </div>
       </div>
     </div>
 
     <div v-else class="empty-state">
-      <div class="empty-icon">📚</div>
+      <IconBook class="empty-icon-svg" />
       <p class="empty-title">还没有收藏任何资源</p>
       <p class="empty-sub">去资源浏览页面收藏感兴趣的内容吧</p>
     </div>
@@ -31,14 +40,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
+import { formatDateTime } from '../../utils/timeFormat'
+import { IconCollection, IconDiamond, IconDownload, IconClock, IconClose, IconBook } from '../icons'
 
+const router = useRouter()
 const collections = ref<any[]>([])
-
-const formatDate = (d: string) => {
-  if (!d) return ''
-  return new Date(d).toLocaleDateString('zh-CN')
-}
 
 const fetchCollections = async () => {
   try {
@@ -64,17 +72,43 @@ const uncollect = async (item: any) => {
   }
 }
 
+const viewResource = (resource: any) => {
+  if (!resource) return
+  router.push(`/student/courses/${resource.id}`)
+}
+
 const downloadResource = async (resource: any) => {
   if (!resource) return
   try {
+    // 检查是否有文件URL
+    if (!resource.file_url) {
+      alert('该资源暂无下载链接')
+      return
+    }
+
     const token = localStorage.getItem('token')
+    
+    // 先调用下载统计API
     await axios.post(`http://127.0.0.1:8000/api/courses/${resource.id}/download/`, {}, {
       headers: { Authorization: `Bearer ${token}` }
     })
+    
+    // 增加本地下载计数
     resource.downloads += 1
-    alert('下载成功！')
+    
+    // 创建隐藏的a标签进行真实下载
+    const link = document.createElement('a')
+    link.href = resource.file_url
+    link.target = '_blank'
+    link.download = resource.title || 'download'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    alert('下载已开始！')
   } catch (e: any) {
-    alert(e.response?.data?.error || '下载失败')
+    console.error('下载失败:', e)
+    alert(e.response?.data?.error || '下载失败，请稍后重试')
   }
 }
 
@@ -82,46 +116,56 @@ onMounted(fetchCollections)
 </script>
 
 <style scoped>
-.page-container { padding: 24px; }
-.page-container h2 { margin: 0 0 24px; font-size: 22px; color: #1a1a2e; }
+.page-container { padding: var(--spacing-lg); }
+.page-container h2 { margin: 0 0 var(--spacing-lg); font-size: var(--h2-font-size); font-weight: var(--h2-font-weight); color: var(--text-primary); display: flex; align-items: center; }
+.header-icon { width: 28px; height: 28px; color: var(--primary-color); margin-right: 10px; }
 
 .collection-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  gap: var(--spacing-md);
 }
 
 .collection-card {
-  background: white;
-  border-radius: 14px;
-  padding: 22px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-  transition: transform 0.2s, box-shadow 0.2s;
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--spacing-sm);
+  cursor: pointer;
 }
 .collection-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  box-shadow: var(--shadow-md);
 }
 
 .card-top { display: flex; justify-content: space-between; align-items: center; }
 .type-tag {
-  background: #ecf5ff;
-  color: #409eff;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
+  background: rgba(13, 148, 136, 0.1);
+  color: var(--primary-color);
+  padding: 4px 12px;
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
 }
-.points-badge { color: #e6a23c; font-size: 13px; font-weight: 500; }
+.points-badge { 
+  color: var(--warning-color); 
+  font-size: var(--font-size-sm); 
+  font-weight: var(--font-weight-medium);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.badge-icon { width: 14px; height: 14px; }
 
 .card-title {
   margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a1a2e;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -131,8 +175,8 @@ onMounted(fetchCollections)
 }
 .card-desc {
   margin: 0;
-  font-size: 13px;
-  color: #909399;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
   line-height: 1.6;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -145,34 +189,45 @@ onMounted(fetchCollections)
 .card-meta {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
-  color: #c0c4cc;
-  padding-top: 10px;
-  border-top: 1px solid #f5f5f5;
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--border-light);
 }
+.card-meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.meta-icon { width: 12px; height: 12px; }
 
-.card-actions { display: flex; gap: 10px; }
+.card-actions { display: flex; gap: var(--spacing-sm); }
 .btn-download, .btn-uncollect {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   padding: 8px 0;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--border-radius-md);
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  transition: opacity 0.2s;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast);
 }
-.btn-download { background: #409eff; color: white; }
-.btn-download:hover { opacity: 0.85; }
-.btn-uncollect { background: #fef0f0; color: #f56c6c; border: 1px solid #fde2e2; }
-.btn-uncollect:hover { background: #fde2e2; }
+.btn-icon { width: 14px; height: 14px; }
+.btn-download { background: var(--primary-color); color: white; }
+.btn-download:hover { background: var(--primary-hover); }
+.btn-uncollect { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+.btn-uncollect:hover { background: var(--danger-color); color: white; }
 
 .empty-state {
   text-align: center;
   padding: 80px 20px;
-  color: #c0c4cc;
+  color: var(--text-tertiary);
 }
-.empty-icon { font-size: 64px; margin-bottom: 16px; }
-.empty-title { font-size: 16px; color: #909399; margin: 0 0 8px; }
-.empty-sub { font-size: 13px; margin: 0; }
+.empty-icon-svg { width: 64px; height: 64px; margin-bottom: var(--spacing-md); color: var(--text-tertiary); }
+.empty-title { font-size: var(--font-size-base); color: var(--text-secondary); margin: 0 0 var(--spacing-xs); }
+.empty-sub { font-size: var(--font-size-sm); margin: 0; }
 </style>
