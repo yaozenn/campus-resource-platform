@@ -27,10 +27,10 @@
       </nav>
       
       <div class="nav-actions">
-        <div class="user-points-badge">
+        <router-link to="/student/points" class="user-points-badge">
           <IconStar class="points-icon" />
           <span>{{ userPoints }} 积分</span>
-        </div>
+        </router-link>
         <router-link to="/student/personal" class="user-avatar-link">
           <div class="user-avatar">{{ userInitial }}</div>
         </router-link>
@@ -169,12 +169,20 @@ const handleLogout = () => {
   border-radius: 20px;
   font-size: 14px;
   font-weight: 600;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.user-points-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
 }
 
 .points-icon {
   width: 16px;
   height: 16px;
-  fill: currentColor;
+  color: white;
 }
 
 .user-avatar-link {
