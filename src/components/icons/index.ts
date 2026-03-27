@@ -68,5 +68,5 @@ export { default as IconTag } from './IconTag.vue'
 export { default as IconTrash } from './IconTrash.vue'
 export { default as IconDatabase } from './IconDatabase.vue'
 export { default as IconTrophy } from './IconTrophy.vue'
-export { default as IconEyeOff } from './IconEyeOff.vue'
+
 export { default as IconAlertCircle } from './IconAlertCircle.vue'
