@@ -80,7 +80,7 @@
         <form @submit.prevent="handleSubmit" class="login-form">
           <div class="input-wrapper">
             <label class="input-label">用户名</label>
-            <div class="input-group floating">
+            <div class="input-group floating" :class="{ 'has-error': usernameError }">
               <IconUser class="input-icon-svg" />
               <input
                 v-model="username"
@@ -89,14 +89,22 @@
                 autocomplete="username"
                 @focus="activeInput = 'username'"
                 @blur="activeInput = ''"
+                @input="validateUsernameInput"
               />
+              <IconAlertCircle v-if="usernameError" class="error-icon-svg" />
               <div class="input-focus-line" :class="{ active: activeInput === 'username' }"></div>
             </div>
+            <transition name="fade">
+              <div v-if="usernameError" class="error-message-inline">
+                <IconAlertCircle class="error-icon-small" />
+                {{ usernameError }}
+              </div>
+            </transition>
           </div>
 
           <div class="input-wrapper">
             <label class="input-label">密码</label>
-            <div class="input-group floating">
+            <div class="input-group floating" :class="{ 'has-error': passwordError }">
               <IconLock class="input-icon-svg" />
               <input
                 :type="showPassword ? 'text' : 'password'"
@@ -110,8 +118,15 @@
               <button type="button" class="toggle-pwd" @click="showPassword = !showPassword">
                 <component :is="showPassword ? IconEye : IconEyeOff" class="toggle-icon" />
               </button>
+              <IconAlertCircle v-if="passwordError" class="error-icon-svg" />
               <div class="input-focus-line" :class="{ active: activeInput === 'password' }"></div>
             </div>
+            <transition name="fade">
+              <div v-if="passwordError" class="error-message-inline">
+                <IconAlertCircle class="error-icon-small" />
+                {{ passwordError }}
+              </div>
+            </transition>
           </div>
 
           <div class="form-options">
@@ -167,31 +182,60 @@
         <div class="dialog-body">
           <div class="input-wrapper">
             <label class="input-label">用户名</label>
-            <div class="input-group">
+            <div class="input-group" :class="{ 'has-error': forgotForm.usernameError }">
               <IconUser class="input-icon-svg" />
-              <input v-model="forgotForm.username" placeholder="请输入用户名" required />
+              <input v-model="forgotForm.username" placeholder="请输入用户名" required @input="validateForgotUsername" />
+              <IconAlertCircle v-if="forgotForm.usernameError" class="error-icon-svg" />
             </div>
+            <transition name="fade">
+              <div v-if="forgotForm.usernameError" class="error-message-inline">
+                <IconAlertCircle class="error-icon-small" />
+                {{ forgotForm.usernameError }}
+              </div>
+            </transition>
           </div>
           <div class="input-wrapper">
             <label class="input-label">旧密码</label>
-            <div class="input-group">
+            <div class="input-group" :class="{ 'has-error': forgotForm.oldPasswordError }">
               <IconLock class="input-icon-svg" />
               <input type="password" v-model="forgotForm.oldPassword" placeholder="请输入旧密码" required />
+              <IconAlertCircle v-if="forgotForm.oldPasswordError" class="error-icon-svg" />
             </div>
+            <transition name="fade">
+              <div v-if="forgotForm.oldPasswordError" class="error-message-inline">
+                <IconAlertCircle class="error-icon-small" />
+                {{ forgotForm.oldPasswordError }}
+              </div>
+            </transition>
           </div>
           <div class="input-wrapper">
             <label class="input-label">新密码</label>
-            <div class="input-group">
+            <div class="input-group" :class="{ 'has-error': forgotForm.newPasswordError }">
               <IconLock class="input-icon-svg" />
-              <input type="password" v-model="forgotForm.newPassword" placeholder="请输入新密码（至少6位）" required />
+              <input type="password" v-model="forgotForm.newPassword" placeholder="请输入新密码（至少 6 位）" required @input="validateForgotNewPassword" />
+              <IconAlertCircle v-if="forgotForm.newPasswordError" class="error-icon-svg" />
             </div>
+            <transition name="fade">
+              <div v-if="forgotForm.newPasswordError" class="error-message-inline">
+                <IconAlertCircle class="error-icon-small" />
+                {{ forgotForm.newPasswordError }}
+              </div>
+            </transition>
+            <PasswordStrength v-if="forgotForm.newPassword" :password="forgotForm.newPassword" />
           </div>
           <div class="input-wrapper">
             <label class="input-label">确认新密码</label>
-            <div class="input-group">
+            <div class="input-group" :class="{ 'has-error': forgotForm.confirmPasswordError }">
               <IconLock class="input-icon-svg" />
-              <input type="password" v-model="forgotForm.confirmPassword" placeholder="请再次输入新密码" required />
+              <input type="password" v-model="forgotForm.confirmPassword" placeholder="请再次输入新密码" required @input="validateForgotConfirmPassword" />
+              <IconAlertCircle v-if="forgotForm.confirmPasswordError" class="error-icon-svg" />
             </div>
+            <transition name="fade">
+              <div v-if="forgotForm.confirmPasswordError" class="error-message-inline">
+                <IconAlertCircle class="error-icon-small" />
+                {{ forgotForm.confirmPasswordError }}
+              </div>
+            </transition>
           </div>
           <button @click="handleChangePassword" class="btn-submit" :disabled="changingPassword">
             <span v-if="!changingPassword">确认修改</span>
@@ -220,8 +264,11 @@ import {
   IconSparkles,
   IconCollection,
   IconMessageCircle,
-  IconZap
+  IconZap,
+  IconAlertCircle
 } from './icons'
+import PasswordStrength from './common/PasswordStrength.vue'
+import { validateUsername, validatePassword, validatePasswordMatch } from '@/utils/validation'
 
 const router = useRouter()
 type RoleType = 'admin' | 'student' | 'teacher'
@@ -232,6 +279,8 @@ const showPassword = ref(false)
 const loading = ref(false)
 const rememberMe = ref(false)
 const activeInput = ref('')
+const usernameError = ref('')
+const passwordError = ref('')
 
 // 忘记密码弹窗
 const showForgotDialog = ref(false)
@@ -240,8 +289,38 @@ const forgotForm = ref({
   username: '',
   oldPassword: '',
   newPassword: '',
-  confirmPassword: ''
+  confirmPassword: '',
+  usernameError: '',
+  oldPasswordError: '',
+  newPasswordError: '',
+  confirmPasswordError: ''
 })
+
+// 验证函数
+const validateUsernameInput = () => {
+  const result = validateUsername(username.value)
+  usernameError.value = result.valid ? '' : (result.message || '')
+}
+
+const validatePasswordInput = () => {
+  const result = validatePassword(password.value)
+  passwordError.value = result.valid ? '' : (result.message || '')
+}
+
+const validateForgotUsername = () => {
+  const result = validateUsername(forgotForm.value.username)
+  forgotForm.value.usernameError = result.valid ? '' : (result.message || '')
+}
+
+const validateForgotNewPassword = () => {
+  const result = validatePassword(forgotForm.value.newPassword)
+  forgotForm.value.newPasswordError = result.valid ? '' : (result.message || '')
+}
+
+const validateForgotConfirmPassword = () => {
+  const result = validatePasswordMatch(forgotForm.value.newPassword, forgotForm.value.confirmPassword)
+  forgotForm.value.confirmPasswordError = result.valid ? '' : (result.message || '')
+}
 
 // 页面加载时检查是否有保存的登录信息
 onMounted(() => {
