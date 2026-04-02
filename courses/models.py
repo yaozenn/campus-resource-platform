@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Avg, Count
 from users.models import User
 
 class ResourceType(models.Model):
@@ -31,9 +32,23 @@ class Resource(models.Model):
     is_second_hand = models.BooleanField(default=False, verbose_name='是否二手')
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='价格')
     
-    # 新增高级功能字段
+    # 高级功能字段
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=5.0, verbose_name='资源评分')
     rating_count = models.IntegerField(default=0, verbose_name='评分人数')
+
+    def update_rating(self):
+        """
+        核心方法：重新计算并更新该资源的平均评分
+        封装在模型中，方便视图层调用，且保持逻辑一致
+        """
+        stats = self.comments.aggregate(
+            avg_score=Avg('user_rating'),
+            total_count=Count('id')
+        )
+        if stats['avg_score'] is not None:
+            self.rating = round(stats['avg_score'], 2)
+            self.rating_count = stats['total_count']
+            self.save(update_fields=['rating', 'rating_count'])
 
     def __str__(self):
         return self.title

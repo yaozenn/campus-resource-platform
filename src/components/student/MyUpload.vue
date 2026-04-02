@@ -105,7 +105,6 @@ const formData = ref({
   points_required: 0, is_second_hand: false, price: 0
 })
 
-// 把类型进行大类分组，方便在下拉框 optgroup 里展示
 const groupedTypes = computed(() => {
   const groups: Record<string, any[]> = {}
   types.value.forEach(t => {
@@ -118,7 +117,6 @@ const groupedTypes = computed(() => {
 
 const getStatusText = (status: string) => ({ pending: '待审核', active: '已发布', rejected: '已驳回' }[status] || '未知')
 
-// 获取我上传的资源（复用了后端的教师获取接口逻辑，该接口只认 uploader=自己）
 const fetchMyResources = async () => {
   try {
     const token = localStorage.getItem('token')
@@ -131,7 +129,6 @@ const fetchMyResources = async () => {
   }
 }
 
-// 获取平台分类库
 const fetchTypes = async () => {
   try {
     const res = await axios.get('http://127.0.0.1:8000/api/courses/types/')
@@ -145,11 +142,15 @@ const closeUploadModal = () => {
   formData.value = { title: '', type: '', description: '', file_url: '', points_required: 0, is_second_hand: false, price: 0 }
 }
 
-// 提交新资源
 const submitResource = async () => {
+  // 核心逻辑修复：如果用户没选分类，阻止提交并提醒
+  if (!formData.value.type) {
+    alert('请选择资源分类！')
+    return
+  }
+
   try {
     const token = localStorage.getItem('token')
-    // 二手物品如果不填价格默认为 0
     if (!formData.value.is_second_hand) formData.value.price = 0
     
     await axios.post('http://127.0.0.1:8000/api/courses/create/', formData.value, {
@@ -158,10 +159,13 @@ const submitResource = async () => {
     alert('提交成功，请等待管理员审核！')
     closeUploadModal()
     fetchMyResources()
-  } catch (error) { alert('提交失败，请检查填写内容') }
+  } catch (error: any) { 
+    // 调试辅助：如果失败了，看看后端到底说了什么
+    console.error('上传失败详情:', error.response?.data)
+    alert('提交失败，请检查填写内容或链接格式') 
+  }
 }
 
-// 删除资源
 const deleteResource = async (id: number) => {
   if (!confirm('确定要删除这份资源吗？')) return
   try {
@@ -181,6 +185,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* 此处保留你原本的所有样式，完全不动 */
 .page-container { padding: var(--spacing-lg); max-width: 1200px; margin: 0 auto; }
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xl); }
 .page-header h2 { font-size: var(--font-size-2xl); font-weight: 600; color: var(--text-primary); margin-bottom: var(--spacing-xs); font-family: var(--font-sf); }
@@ -192,8 +197,6 @@ onMounted(() => {
 .btn-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 .btn-danger:hover { background: #ef4444; color: white; }
 .btn-sm { padding: 6px 14px; font-size: 13px; }
-
-/* 卡片布局 */
 .resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
 .card { background: var(--bg-primary); border-radius: var(--border-radius-lg); border: 1px solid var(--border-light); position: relative; overflow: hidden; display: flex; flex-direction: column; }
 .card-status { position: absolute; top: 12px; right: 12px; font-size: 12px; padding: 4px 10px; border-radius: 12px; font-weight: 600; }
@@ -209,8 +212,6 @@ onMounted(() => {
 .card-footer { padding: 12px 20px; border-top: 1px solid var(--border-light); display: flex; justify-content: flex-end; }
 .full-width { grid-column: 1 / -1; }
 .empty-state { padding: 60px; text-align: center; color: var(--text-tertiary); }
-
-/* 弹窗样式 */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
 .modal-card { background: var(--bg-primary); width: 100%; max-width: 500px; border-radius: var(--border-radius-xl); box-shadow: var(--shadow-xl); overflow: hidden; }
 .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border-light); background: var(--bg-secondary); }
@@ -225,7 +226,6 @@ onMounted(() => {
 .form-row { display: flex; align-items: center; }
 .checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-primary); cursor: pointer; }
 .modal-footer { margin-top: 10px; display: flex; justify-content: flex-end; gap: 12px; }
-
 .fade-in { animation: fadeIn var(--transition-normal); }
 .slide-up { animation: slideUp var(--transition-normal); }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

@@ -16,9 +16,19 @@ class ResourceSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ResourceCreateSerializer(serializers.ModelSerializer):
+    """
+    专用上传序列化器
+    修复：增加链接自动补全逻辑，防止因格式问题导致上传失败
+    """
     class Meta:
         model = Resource
         exclude = ('uploader', 'status', 'reject_reason', 'downloads', 'rating', 'rating_count')
+
+    def validate_file_url(self, value):
+        # 自动补全协议头，解决 URLField 校验失败的问题
+        if value and not value.startswith(('http://', 'https://')):
+            return 'http://' + value
+        return value
 
 class CommentSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.username', read_only=True)

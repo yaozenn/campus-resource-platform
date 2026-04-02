@@ -1,4 +1,5 @@
 from django.db import models, transaction
+from django.db.models import F
 from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
@@ -28,13 +29,18 @@ class User(AbstractUser):
 
     def add_points(self, amount, change_type, description=""):
         """
-        统一的积分变动方法（支持事务和流水记录）
+        统一的积分变动方法（使用 F 表达式防止并发冲突）
         """
-        from points.models import PointRecord # 局部引入避免循环引用
+        from points.models import PointRecord  # 局部引入避免循环引用
+        
         with transaction.atomic():
-            self.points = (self.points or 0) + amount
-            self.save(update_fields=['points'])
+            # 1. 核心修复：使用 F() 表达式在数据库层面进行原子加法，防止覆盖更新
+            User.objects.filter(pk=self.pk).update(points=F('points') + amount)
             
+            # 2. 刷新内存对象，获取数据库中更新后的真实分数值
+            self.refresh_from_db()
+            
+            # 3. 创建积分流水记录
             PointRecord.objects.create(
                 user=self,
                 change_amount=amount,

@@ -1,7 +1,7 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
-from django.db.models import Avg
+from django.db import models
 from .models import Resource, ResourceComment, ResourceCollection, ResourceType, ResourceReport
 from .serializers import (
     ResourceSerializer, ResourceCreateSerializer, CommentSerializer, 
@@ -43,9 +43,22 @@ class ResourceCreateView(generics.CreateAPIView):
         serializer.save(uploader=self.request.user, status='pending')
 
 class ResourceDetailView(generics.RetrieveAPIView):
+    """资源详情视图 - 增加了下载量自动统计逻辑"""
     queryset = Resource.objects.all()
     serializer_class = ResourceSerializer
     permission_classes = [permissions.AllowAny]
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        # 核心修复：点击/获取资源详情时，下载次数原子性 +1
+        Resource.objects.filter(pk=instance.pk).update(downloads=models.F('downloads') + 1)
+        
+        # 刷新实例以获取最新的下载数值返回给前端
+        instance.refresh_from_db()
+        
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 class ResourceUpdateView(generics.UpdateAPIView):
     queryset = Resource.objects.all()
@@ -78,8 +91,11 @@ class ResourceApproveView(generics.UpdateAPIView):
         action = request.data.get('action')
 
         if action == 'approve':
-            if resource.status == 'pending':
+            # 允许从“待审核”或“已拒绝”状态重新转为“已发布”
+            if resource.status in ['pending', 'rejected']:
                 resource.status = 'active'
+                resource.reject_reason = "" # 审核通过时清空之前的拒绝原因
+                
                 # 资源审核通过奖励：20分
                 uploader = resource.uploader
                 if uploader.role == 'student':
@@ -109,24 +125,18 @@ class ResourceCommentView(generics.ListCreateAPIView):
         user = self.request.user
         resource_id = self.kwargs['pk']
         
-        # 1. 保存评论（包含用户打分 user_rating）
+        # 1. 检查是否是首次评论该资源，防止无限刷分
+        is_first_comment = not ResourceComment.objects.filter(user=user, resource_id=resource_id).exists()
+        
+        # 2. 保存评论（包含用户打分 user_rating）
         comment = serializer.save(user=user, resource_id=resource_id)
         
-        # 2. 积分奖励：10分
-        if user.role == 'student':
+        # 3. 积分奖励：仅限学生且是首次评论奖励 10 分
+        if user.role == 'student' and is_first_comment:
             user.add_points(10, 'post', f"参与资源《{comment.resource.title}》讨论")
             
-        # 3. 核心功能：自动更新资源平均分
-        resource = comment.resource
-        stats = ResourceComment.objects.filter(resource=resource).aggregate(
-            avg_score=Avg('user_rating'), 
-            total_count=models.Count('id')
-        )
-        
-        if stats['avg_score']:
-            resource.rating = round(stats['avg_score'], 2)
-            resource.rating_count = stats['total_count']
-            resource.save(update_fields=['rating', 'rating_count'])
+        # 4. 直接调用模型方法更新评分数据
+        comment.resource.update_rating()
 
 class ResourceReportView(generics.CreateAPIView):
     serializer_class = ReportSerializer

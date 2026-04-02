@@ -1,8 +1,6 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-import pymysql
-pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -11,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv()
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-8w^&amp;$r#f7@x!z*3^&amp;9yq#p*7*%!j*k#v#n!m#c#b#a')
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-8w^&r#f7@x!z*3^&9yq#p*7*%!j*k#v#n!m#c#b#a')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -53,7 +51,7 @@ ROOT_URLCONF = 'campus_platform.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'dist'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -113,9 +111,6 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = []
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# 托管前端打包文件
-TEMPLATES[0]['DIRS'] = [BASE_DIR / 'dist']
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
