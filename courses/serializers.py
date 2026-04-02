@@ -16,16 +16,17 @@ class ResourceSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ResourceCreateSerializer(serializers.ModelSerializer):
-    """
-    专用上传序列化器
-    修复：增加链接自动补全逻辑，防止因格式问题导致上传失败
-    """
+    type_id = serializers.PrimaryKeyRelatedField(
+        queryset=ResourceType.objects.all(),
+        source='type',
+        error_messages={'required': '请选择资源分类', 'does_not_exist': '所选分类不存在'}
+    )
+    
     class Meta:
         model = Resource
-        exclude = ('uploader', 'status', 'reject_reason', 'downloads', 'rating', 'rating_count')
+        exclude = ('uploader', 'status', 'reject_reason', 'downloads', 'rating', 'rating_count', 'type')
 
     def validate_file_url(self, value):
-        # 自动补全协议头，解决 URLField 校验失败的问题
         if value and not value.startswith(('http://', 'https://')):
             return 'http://' + value
         return value

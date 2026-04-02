@@ -51,7 +51,7 @@
 
           <div class="form-group">
             <label>所属分类 <span class="required">*</span></label>
-            <select v-model="formData.type" required class="input">
+            <select v-model="formData.type_id" required class="input">
               <option value="" disabled>请选择分类</option>
               <optgroup v-for="(subTypes, mainCat) in groupedTypes" :key="mainCat" :label="String(mainCat)">
                 <option v-for="t in subTypes" :key="t.id" :value="t.id">{{ t.name }}</option>
@@ -101,7 +101,7 @@ const types = ref<any[]>([])
 const showUploadModal = ref(false)
 
 const formData = ref({
-  title: '', type: '', description: '', file_url: '', 
+  title: '', type_id: '', description: '', file_url: '', 
   points_required: 0, is_second_hand: false, price: 0
 })
 
@@ -139,12 +139,11 @@ const fetchTypes = async () => {
 const openUploadModal = () => { showUploadModal.value = true }
 const closeUploadModal = () => {
   showUploadModal.value = false
-  formData.value = { title: '', type: '', description: '', file_url: '', points_required: 0, is_second_hand: false, price: 0 }
+  formData.value = { title: '', type_id: '', description: '', file_url: '', points_required: 0, is_second_hand: false, price: 0 }
 }
 
 const submitResource = async () => {
-  // 核心逻辑修复：如果用户没选分类，阻止提交并提醒
-  if (!formData.value.type) {
+  if (!formData.value.type_id) {
     alert('请选择资源分类！')
     return
   }
@@ -160,9 +159,12 @@ const submitResource = async () => {
     closeUploadModal()
     fetchMyResources()
   } catch (error: any) { 
-    // 调试辅助：如果失败了，看看后端到底说了什么
     console.error('上传失败详情:', error.response?.data)
-    alert('提交失败，请检查填写内容或链接格式') 
+    const errorMsg = error.response?.data?.type_id?.[0] || 
+                     error.response?.data?.file_url?.[0] || 
+                     error.response?.data?.detail ||
+                     '提交失败，请检查填写内容'
+    alert(errorMsg)
   }
 }
 

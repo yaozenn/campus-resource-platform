@@ -10,17 +10,21 @@ class User(AbstractUser):
     )
     
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='student', verbose_name='角色')
+    name = models.CharField(max_length=50, blank=True, default='', verbose_name='姓名')
     avatar = models.URLField(blank=True, verbose_name='头像地址')
     bio = models.TextField(blank=True, verbose_name='个人简介')
     points = models.IntegerField(default=0, verbose_name='积分')
     
-    # 额外字段
     student_id = models.CharField(max_length=20, blank=True, verbose_name='学号')
     employee_id = models.CharField(max_length=20, blank=True, verbose_name='教工号')
     real_name = models.CharField(max_length=50, blank=True, verbose_name='真实姓名')
     department = models.CharField(max_length=100, blank=True, verbose_name='院系/部门')
     phone = models.CharField(max_length=20, blank=True, verbose_name='手机号')
     gender = models.CharField(max_length=10, choices=(('male', '男'), ('female', '女'), ('other', '其他')), default='other', verbose_name='性别')
+    major = models.CharField(max_length=50, blank=True, default='', verbose_name='专业')
+    grade = models.CharField(max_length=20, blank=True, default='', verbose_name='年级')
+    subject = models.CharField(max_length=50, blank=True, default='', verbose_name='学科')
+    signature = models.CharField(max_length=200, blank=True, default='', verbose_name='个性签名')
     supervisor = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='students', verbose_name='导师')
 
     class Meta:
