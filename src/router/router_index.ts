@@ -24,9 +24,9 @@ const router = createRouter({
         { path: 'students', name: 'StudentManagement', component: () => import('../components/admin/StudentManagement.vue') },
         { path: 'resources', name: 'ResourceManagement', component: () => import('../components/admin/AdminCourseResourceManagement.vue') },
         { path: 'forum', name: 'ForumManagement', component: () => import('../components/admin/ForumManagement.vue') },
-          { path: 'forum/:id', name: 'AdminPostDetail', component: () => import('../components/student/PostDetail.vue') },
-          { path: 'announcements', name: 'AnnouncementManagement', component: () => import('../components/admin/AnnouncementManagement.vue') },
-          { path: 'announcements/:id', name: 'AdminAnnouncementDetail', component: () => import('../components/student/AnnouncementDetail.vue') },
+        { path: 'forum/:id', name: 'AdminPostDetail', component: () => import('../components/student/PostDetail.vue') },
+        { path: 'announcements', name: 'AnnouncementManagement', component: () => import('../components/admin/AnnouncementManagement.vue') },
+        { path: 'announcements/:id', name: 'AdminAnnouncementDetail', component: () => import('../components/student/AnnouncementDetail.vue') },
         { path: 'types', name: 'TypeManagement', component: () => import('../components/admin/TypeManagement.vue') },
         { path: 'analysis', name: 'DataAnalysis', component: () => import('../components/admin/DataAnalysis.vue') },
         { path: 'user-overview', name: 'AdminUserOverview', component: () => import('../components/admin/UserOverview.vue') },
@@ -53,6 +53,8 @@ const router = createRouter({
         { path: 'personal', name: 'StudentPersonal', component: () => import('../components/student/PersonalCenter.vue') },
         { path: 'collections', name: 'CollectionManagement', component: () => import('../components/student/CollectionManagement.vue') },
         { path: 'points', name: 'MyPoints', component: () => import('../components/student/MyPoints.vue') },
+        // 👇 新增的：学生我的上传/分享页面
+        { path: 'uploads', name: 'StudentUploads', component: () => import('../components/student/MyUpload.vue') },
         { path: '', redirect: '/student/forum' }
       ]
     },
@@ -64,11 +66,10 @@ const router = createRouter({
         { path: 'personal', name: 'TeacherPersonal', component: () => import('../components/teacher/PersonalCenter.vue') },
         { path: 'courses', name: 'TeacherCourseManagement', component: () => import('../components/teacher/CourseResourceManagement.vue') },
         { path: 'comments', name: 'CourseResourceComments', component: () => import('../components/teacher/CourseResourceComments.vue') },
-        // 直接复用 student 的公告和论坛组件，消除重复代码
-          { path: 'announcements', name: 'TeacherAnnouncements', component: StudentAnnouncements },
-          { path: 'announcements/:id', name: 'TeacherAnnouncementDetail', component: () => import('../components/student/AnnouncementDetail.vue') },
-          { path: 'forum', name: 'TeacherForum', component: StudentForum },
-          { path: 'forum/:id', name: 'TeacherPostDetail', component: () => import('../components/student/PostDetail.vue') },
+        { path: 'announcements', name: 'TeacherAnnouncements', component: StudentAnnouncements },
+        { path: 'announcements/:id', name: 'TeacherAnnouncementDetail', component: () => import('../components/student/AnnouncementDetail.vue') },
+        { path: 'forum', name: 'TeacherForum', component: StudentForum },
+        { path: 'forum/:id', name: 'TeacherPostDetail', component: () => import('../components/student/PostDetail.vue') },
         { path: 'students', name: 'TeacherStudentManagement', component: () => import('../components/teacher/StudentManagement.vue') },
         { path: '', redirect: '/teacher/personal' },
         { path: 'ai', name: 'TeacherAI', component: () => import('../components/teacher/AITeacherInsight.vue') }
@@ -81,7 +82,6 @@ const router = createRouter({
   ]
 })
 
-// 路由守卫：未登录跳转登录页，防止越权访问
 router.beforeEach((to, _from, next) => {
   const token = localStorage.getItem('token')
   const user = JSON.parse(localStorage.getItem('user') || '{}')

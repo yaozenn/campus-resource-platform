@@ -5,7 +5,6 @@
       数据分析
     </h2>
 
-    <!-- 统计卡片 -->
     <div class="stats-grid">
       <div class="stat-card primary" @click="goToUserOverview">
         <div class="stat-icon">
@@ -46,7 +45,6 @@
     </div>
 
     <div class="charts-row">
-      <!-- 用户分布饼图 -->
       <div class="chart-card">
         <h3 class="chart-title">用户角色分布</h3>
         <div class="pie-wrap">
@@ -77,7 +75,6 @@
         </div>
       </div>
 
-      <!-- 热门资源 -->
       <div class="chart-card">
         <h3 class="chart-title">热门资源 TOP 5</h3>
         <div class="bar-list">
@@ -100,7 +97,6 @@
     </div>
 
     <div class="charts-row">
-      <!-- 资源类型分布 -->
       <div class="chart-card">
         <h3 class="chart-title">资源类型分布</h3>
         <div class="pie-wrap">
@@ -131,21 +127,27 @@
         </div>
       </div>
 
-      <!-- 积分分布 -->
       <div class="chart-card">
-        <h3 class="chart-title">积分概览</h3>
-        <div class="points-overview">
-          <div class="points-stat-item">
-            <div class="ps-num">{{ stats.totalPoints }}</div>
-            <div class="ps-label">全平台积分</div>
+        <h3 class="chart-title">资源分类柱状图</h3>
+        <div class="vertical-bar-chart">
+          <div class="v-grid-lines">
+            <div class="v-grid-line"></div>
+            <div class="v-grid-line"></div>
+            <div class="v-grid-line"></div>
+            <div class="v-grid-line"></div>
           </div>
-          <div class="points-stat-item">
-            <div class="ps-num">{{ avgPoints }}</div>
-            <div class="ps-label">人均积分</div>
-          </div>
-          <div class="points-stat-item">
-            <div class="ps-num">{{ stats.totalUsers }}</div>
-            <div class="ps-label">参与用户</div>
+          
+          <div class="v-bars-container">
+            <div v-for="(seg, i) in resourceTypeSegments" :key="i" class="v-bar-item">
+              <div class="v-bar-value" :style="{ color: seg.color }">{{ seg.count }}</div>
+              <div class="v-bar-track">
+                <div
+                  class="v-bar-fill"
+                  :style="{ height: Math.max(seg.pct, 2) + '%', background: seg.color }"
+                ></div>
+              </div>
+              <div class="v-bar-label">{{ seg.name }}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -156,7 +158,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
 import { IconUsers, IconBookOpen, IconMessageCircle, IconGift, IconClipboard } from '@/components/icons'
 
 const router = useRouter()
@@ -205,9 +206,9 @@ const resourceTypeSegments = computed(() => {
   const total = stats.value.totalCourses || 1
   const items = [
     { name: '视频', count: resourceTypeDistribution.value.video, color: '#409eff' },
-    { name: '文档', count: resourceTypeDistribution.value.document, color: '#67c23a' },
-    { name: '课程', count: resourceTypeDistribution.value.course, color: '#e6a23c' },
-    { name: '其他', count: resourceTypeDistribution.value.other, color: '#9b59b6' },
+    { name: '文档', count: resourceTypeDistribution.value.document, color: '#10b981' },
+    { name: '课程', count: resourceTypeDistribution.value.course, color: '#f59e0b' },
+    { name: '其他', count: resourceTypeDistribution.value.other, color: '#8b5cf6' },
   ]
   let offset = 0
   return items.map(item => {
@@ -227,6 +228,10 @@ const fetchStats = async () => {
       stats.value = data.stats
       userDistribution.value = data.userDistribution
       topCourses.value = data.topCourses
+      
+      if (data.resourceTypeDistribution) {
+        resourceTypeDistribution.value = data.resourceTypeDistribution
+      }
     }
   } catch (e) {
     console.error('获取统计数据失败', e)
@@ -250,123 +255,145 @@ onMounted(fetchStats)
 
 <style scoped>
 .page-container { padding: var(--spacing-lg); }
-.page-container h2 { margin: 0 0 var(--spacing-lg); font-size: var(--h2-font-size); font-weight: var(--h2-font-weight); color: var(--text-primary); }
+.page-container h2 { margin: 0 0 var(--spacing-lg); font-size: var(--font-size-2xl); font-weight: 600; color: var(--text-primary); font-family: var(--font-sf); }
 
 /* 统计卡片 */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
-}
-.stat-card {
-  background: var(--bg-primary);
-  border-radius: var(--border-radius-lg);
-  padding: var(--spacing-lg);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  box-shadow: var(--shadow-md);
-  border-left: 4px solid transparent;
-  transition: all var(--transition-normal);
-  cursor: pointer;
-}
-.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-md); margin-bottom: var(--spacing-lg); }
+.stat-card { background: var(--bg-primary); border-radius: var(--border-radius-lg); padding: var(--spacing-lg); display: flex; align-items: center; gap: var(--spacing-md); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); border-left: 4px solid transparent; transition: all var(--transition-normal); cursor: pointer; }
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .stat-card.primary { border-left-color: var(--primary-color); }
 .stat-card.success { border-left-color: var(--success-color); }
 .stat-card.warning { border-left-color: var(--warning-color); }
-.stat-card.danger { border-left-color: var(--danger-color); }
-.stat-icon { 
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  background: rgba(13, 148, 136, 0.1);
-}
+.stat-card.danger { border-left-color: var(--error-color); }
+.stat-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: rgba(13, 148, 136, 0.1); }
 .stat-card.primary .stat-icon { background: rgba(13, 148, 136, 0.15); }
 .stat-card.success .stat-icon { background: rgba(16, 185, 129, 0.15); }
 .stat-card.warning .stat-icon { background: rgba(245, 158, 11, 0.15); }
 .stat-card.danger .stat-icon { background: rgba(239, 68, 68, 0.15); }
-.icon-svg { 
-  width: 24px; 
-  height: 24px; 
-  color: var(--primary-color);
-}
+.icon-svg { width: 24px; height: 24px; color: var(--primary-color); }
 .stat-card.primary .icon-svg { color: var(--primary-color); }
 .stat-card.success .icon-svg { color: var(--success-color); }
 .stat-card.warning .icon-svg { color: var(--warning-color); }
-.stat-card.danger .icon-svg { color: var(--danger-color); }
-.header-icon {
-  width: 28px;
-  height: 28px;
-  color: var(--primary-color);
-  margin-right: 10px;
-  vertical-align: middle;
-}
-.stat-num { font-size: 30px; font-weight: var(--font-weight-bold); color: var(--text-primary); line-height: 1; }
-.stat-label { font-size: var(--font-size-sm); color: var(--text-placeholder); margin-top: 6px; }
+.stat-card.danger .icon-svg { color: var(--error-color); }
+.header-icon { width: 28px; height: 28px; color: var(--primary-color); margin-right: 10px; vertical-align: middle; }
+.stat-num { font-size: 30px; font-weight: 700; color: var(--text-primary); line-height: 1; font-family: var(--font-sf); }
+.stat-label { font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: 6px; }
 
 /* 图表行 */
-.charts-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-}
-.chart-card {
-  background: var(--bg-primary);
-  border-radius: var(--border-radius-lg);
-  padding: var(--spacing-lg);
-  box-shadow: var(--shadow-md);
-  transition: box-shadow var(--transition-normal);
-}
-.chart-card:hover { box-shadow: var(--shadow-lg); }
-.chart-card.full-width { grid-column: 1 / -1; }
-.chart-title { margin: 0 0 var(--spacing-md); font-size: var(--h4-font-size); font-weight: var(--h4-font-weight); color: var(--text-primary); }
+.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); margin-bottom: var(--spacing-md); }
+.chart-card { background: var(--bg-primary); border-radius: var(--border-radius-lg); padding: var(--spacing-lg); border: 1px solid var(--border-light); box-shadow: var(--shadow-sm); transition: box-shadow var(--transition-normal); }
+.chart-card:hover { box-shadow: var(--shadow-md); }
+.chart-title { margin: 0 0 var(--spacing-lg); font-size: 16px; font-weight: 600; color: var(--text-primary); font-family: var(--font-sf); }
 
 /* 饼图 */
-.pie-wrap { display: flex; align-items: center; gap: var(--spacing-lg); }
-.pie-svg { width: 180px; height: 180px; flex-shrink: 0; }
-.pie-center-num { font-size: 22px; font-weight: var(--font-weight-bold); fill: var(--text-primary); }
-.pie-center-label { font-size: 11px; fill: var(--text-placeholder); }
-.pie-legend { display: flex; flex-direction: column; gap: var(--spacing-sm); flex: 1; }
-.legend-row { display: flex; align-items: center; gap: var(--spacing-xs); }
-.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.legend-name { flex: 1; font-size: var(--font-size-sm); color: var(--text-secondary); }
-.legend-count { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--text-primary); }
-.legend-pct { font-size: var(--font-size-xs); color: var(--text-disabled); min-width: 36px; text-align: right; }
+.pie-wrap { display: flex; align-items: center; justify-content: center; gap: 30px; height: 200px; }
+.pie-svg { width: 160px; height: 160px; flex-shrink: 0; }
+.pie-center-num { font-size: 24px; font-weight: 700; fill: var(--text-primary); font-family: var(--font-sf); }
+.pie-center-label { font-size: 12px; fill: var(--text-secondary); }
+.pie-legend { display: flex; flex-direction: column; gap: 12px; }
+.legend-row { display: flex; align-items: center; gap: 10px; }
+.legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+.legend-name { width: 60px; font-size: 14px; color: var(--text-secondary); }
+.legend-count { width: 40px; font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.legend-pct { font-size: 12px; color: var(--text-tertiary); text-align: right; width: 40px; }
 
-/* 条形图 */
-.bar-list { display: flex; flex-direction: column; gap: var(--spacing-sm); }
-.bar-item { display: flex; align-items: center; gap: var(--spacing-sm); }
-.bar-rank {
-  width: 24px; height: 24px; border-radius: var(--border-radius-sm);
-  display: flex; align-items: center; justify-content: center;
-  font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); flex-shrink: 0; color: white;
-  background: var(--text-disabled);
-}
-.bar-rank.rank-1 { background: #f7ba2a; }
-.bar-rank.rank-2 { background: #b0b0b0; }
-.bar-rank.rank-3 { background: #cd7f32; }
+/* 基础条形图(热门资源) */
+.bar-list { display: flex; flex-direction: column; gap: 16px; height: 200px; justify-content: center; }
+.bar-item { display: flex; align-items: center; gap: 12px; }
+.bar-rank { width: 24px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; color: white; background: var(--text-tertiary); }
+.bar-rank.rank-1 { background: #f59e0b; }
+.bar-rank.rank-2 { background: #9ca3af; }
+.bar-rank.rank-3 { background: #b45309; }
 .bar-info { flex: 1; }
-.bar-name { font-size: var(--font-size-sm); color: var(--text-primary); margin-bottom: 6px; font-weight: var(--font-weight-medium); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
-.bar-track { height: 8px; background: var(--bg-secondary); border-radius: var(--border-radius-sm); overflow: hidden; }
-.bar-fill { height: 100%; border-radius: var(--border-radius-sm); transition: width 0.6s ease; }
-.bar-value { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--text-primary); min-width: 50px; text-align: right; }
-.bar-unit { font-size: var(--font-size-xs); color: var(--text-placeholder); margin-left: 2px; }
-.empty-tip { text-align: center; color: var(--text-disabled); padding: var(--spacing-md); }
+.bar-name { font-size: 14px; color: var(--text-primary); margin-bottom: 6px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+.bar-track { height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+.bar-value { font-size: 14px; font-weight: 600; color: var(--text-primary); min-width: 40px; text-align: right; }
+.bar-unit { font-size: 12px; color: var(--text-tertiary); margin-left: 2px; font-weight: 400; }
+.empty-tip { text-align: center; color: var(--text-tertiary); padding: 20px; }
 
-/* 积分概览 */
-.points-overview { display: flex; gap: 0; }
-.points-stat-item {
-  flex: 1;
-  text-align: center;
-  padding: var(--spacing-md);
-  border-right: 1px solid var(--border-light);
+
+/* ---------------- 新增：垂直柱状图样式 ---------------- */
+.vertical-bar-chart {
+  position: relative;
+  height: 200px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
-.points-stat-item:last-child { border-right: none; }
-.ps-num { font-size: 32px; font-weight: var(--font-weight-bold); color: var(--warning-color); line-height: 1; }
-.ps-label { font-size: var(--font-size-sm); color: var(--text-placeholder); margin-top: 8px; }
+
+/* 虚线背景网格 */
+.v-grid-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 24px; /* 留出底部标签空间 */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 1;
+}
+.v-grid-line {
+  border-top: 1px dashed var(--border-color);
+  width: 100%;
+}
+
+/* 柱子容器区 */
+.v-bars-container {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  border-bottom: 1px solid var(--border-dark);
+  padding-bottom: 4px; /* 柱子和底线的间距 */
+  margin-bottom: 24px; /* 为底部文字预留位置 */
+}
+
+/* 单个垂直柱子项目 */
+.v-bar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%; /* 撑满容器高度 */
+  position: relative;
+}
+
+/* 顶部数值 */
+.v-bar-value {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+/* 柱子轨道（控制最大高度和底色） */
+.v-bar-track {
+  width: 36px;
+  height: 140px; /* 图表中柱子可达到的最大高度 */
+  background: var(--bg-tertiary);
+  border-radius: 6px 6px 0 0;
+  display: flex;
+  align-items: flex-end; /* 从底部开始填充 */
+  overflow: hidden;
+}
+
+/* 柱子填充（动画高度） */
+.v-bar-fill {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 底部标签名称 */
+.v-bar-label {
+  position: absolute;
+  bottom: -26px; /* 放在底线下方 */
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  white-space: nowrap;
+}
 </style>

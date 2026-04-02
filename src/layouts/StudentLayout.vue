@@ -1,6 +1,5 @@
 <template>
   <div class="dashboard">
-    <!-- 顶部导航栏 - 磨玻璃效果 -->
     <header class="top-nav glass">
       <div class="nav-brand">
         <IconBook class="brand-icon" />
@@ -10,7 +9,11 @@
       <nav class="nav-menu">
         <router-link to="/student/courses" class="nav-item">
           <IconBook class="nav-icon" />
-          <span>资源浏览</span>
+          <span>大厅浏览</span>
+        </router-link>
+        <router-link to="/student/uploads" class="nav-item">
+          <IconUpload class="nav-icon" />
+          <span>我的分享</span>
         </router-link>
         <router-link to="/student/collections" class="nav-item">
           <IconStar class="nav-icon" />
@@ -40,7 +43,6 @@
       </div>
     </header>
     
-    <!-- 主内容区 -->
     <main class="main-content">
       <router-view />
     </main>
@@ -60,7 +62,8 @@ import {
   IconAnnouncement, 
   IconLogout,
   IconUser,
-  IconMessage
+  IconMessage,
+  IconUpload
 } from '../components/icons'
 
 const router = useRouter()
@@ -81,164 +84,25 @@ const handleLogout = () => {
 </script>
 
 <style scoped>
-.dashboard {
-  min-height: 100vh;
-  background: var(--bg-color);
-}
-
-/* 顶部导航栏 - 磨玻璃效果 */
-.top-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 32px;
-  z-index: 1000;
-  border-bottom: 1px solid var(--glass-border);
-}
-
-.nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.brand-icon {
-  width: 32px;
-  height: 32px;
-  color: var(--primary-color);
-}
-
-.brand-name {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text-primary);
-  font-family: var(--font-sf);
-  letter-spacing: -0.5px;
-}
-
-/* 导航菜单 */
-.nav-menu {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  color: var(--text-secondary);
-  text-decoration: none;
-  border-radius: var(--border-radius-md);
-  font-size: 15px;
-  font-weight: 500;
-  transition: all var(--transition-fast);
-}
-
-.nav-item:hover {
-  color: var(--primary-color);
-  background: rgba(13, 148, 136, 0.08);
-}
-
-.nav-item.router-link-active {
-  color: var(--primary-color);
-  background: rgba(13, 148, 136, 0.12);
-}
-
-.nav-icon {
-  width: 20px;
-  height: 20px;
-}
-
-/* 右侧操作区 */
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.user-points-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
-  color: white;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all var(--transition-fast);
-  cursor: pointer;
-}
-
-.user-points-badge:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
-}
-
-.points-icon {
-  width: 16px;
-  height: 16px;
-  color: white;
-}
-
-.user-avatar-link {
-  text-decoration: none;
-}
-
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-weight: 700;
-  color: white;
-  transition: transform var(--transition-fast);
-}
-
-.user-avatar:hover {
-  transform: scale(1.05);
-}
-
-.logout-btn {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: 1px solid var(--border-color);
-  border-radius: 50%;
-  cursor: pointer;
-  color: var(--text-secondary);
-  transition: all var(--transition-fast);
-}
-
-.logout-btn:hover {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: #ef4444;
-  color: #ef4444;
-}
-
-.logout-icon {
-  width: 20px;
-  height: 20px;
-}
-
-/* 主内容区 */
-.main-content {
-  padding-top: 64px;
-  min-height: 100vh;
-}
+.dashboard { min-height: 100vh; background: var(--bg-color); }
+.top-nav { position: fixed; top: 0; left: 0; right: 0; height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; z-index: 1000; border-bottom: 1px solid var(--glass-border); }
+.nav-brand { display: flex; align-items: center; gap: 12px; }
+.brand-icon { width: 32px; height: 32px; color: var(--primary-color); }
+.brand-name { font-size: 20px; font-weight: 700; color: var(--text-primary); font-family: var(--font-sf); letter-spacing: -0.5px; }
+.nav-menu { display: flex; align-items: center; gap: 8px; }
+.nav-item { display: flex; align-items: center; gap: 8px; padding: 10px 20px; color: var(--text-secondary); text-decoration: none; border-radius: var(--border-radius-md); font-size: 15px; font-weight: 500; transition: all var(--transition-fast); }
+.nav-item:hover { color: var(--primary-color); background: rgba(13, 148, 136, 0.08); }
+.nav-item.router-link-active { color: var(--primary-color); background: rgba(13, 148, 136, 0.12); }
+.nav-icon { width: 20px; height: 20px; }
+.nav-actions { display: flex; align-items: center; gap: 16px; }
+.user-points-badge { display: flex; align-items: center; gap: 6px; padding: 6px 14px; background: linear-gradient(135deg, #f59e0b, #fbbf24); color: white; border-radius: 20px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all var(--transition-fast); cursor: pointer; }
+.user-points-badge:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); }
+.points-icon { width: 16px; height: 16px; color: white; }
+.user-avatar-link { text-decoration: none; }
+.user-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary-color), var(--primary-light)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: white; transition: transform var(--transition-fast); }
+.user-avatar:hover { transform: scale(1.05); }
+.logout-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--border-color); border-radius: 50%; cursor: pointer; color: var(--text-secondary); transition: all var(--transition-fast); }
+.logout-btn:hover { background: rgba(239, 68, 68, 0.1); border-color: #ef4444; color: #ef4444; }
+.logout-icon { width: 20px; height: 20px; }
+.main-content { padding-top: 64px; min-height: 100vh; }
 </style>

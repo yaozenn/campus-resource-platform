@@ -10,12 +10,10 @@ class PostListView(generics.ListAPIView):
     def get_queryset(self):
         queryset = ForumPost.objects.filter(status='approved')
         user_role = self.request.query_params.get('role')
-        
         if user_role:
             queryset = queryset.filter(visible_to__in=['all', user_role])
         else:
             queryset = queryset.filter(visible_to='all')
-        
         return queryset
 
 class PostCreateView(generics.CreateAPIView):
@@ -23,7 +21,11 @@ class PostCreateView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        post = serializer.save(author=self.request.user)
+        # 修复低级失误：论坛发帖奖励修改为 20 分！
+        user = self.request.user
+        if user.role == 'student':
+            user.add_points(20, 'post', f"发布论坛帖子《{post.title[:15]}》")
 
 class PostDetailView(generics.RetrieveAPIView):
     queryset = ForumPost.objects.all()
@@ -67,8 +69,11 @@ class PostCommentView(generics.ListCreateAPIView):
         return ForumComment.objects.filter(post_id=post_id)
 
     def perform_create(self, serializer):
-        post_id = self.kwargs['pk']
-        serializer.save(author=self.request.user, post_id=post_id)
+        # 参与论坛讨论（回复）奖励：10 分
+        user = self.request.user
+        comment = serializer.save(author=user, post_id=self.kwargs['pk'])
+        if user.role == 'student':
+            user.add_points(10, 'post', f"参与帖子《{comment.post.title[:15]}》讨论")
 
 class CommentListView(generics.ListAPIView):
     queryset = ForumComment.objects.all()

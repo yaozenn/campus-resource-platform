@@ -1,66 +1,73 @@
 <template>
-  <div class="page-container">
-    <h2>类型管理</h2>
-    <div class="toolbar">
-      <button @click="showAddDialog = true" class="btn-add">添加类型</button>
+  <div class="page-container fade-in">
+    <div class="page-header">
+      <h2>资源分类体系总览</h2>
+      <p class="subtitle">
+        平台核心分类字典（由系统底层统一配置，为保证师生端数据一致性，当前已禁用手动增删）
+      </p>
     </div>
     
-    <div class="type-list">
-      <div v-for="type in types" :key="type.id" class="type-item">
-        <div class="type-info">
-          <h3>{{ type.name }}</h3>
-          <p>{{ type.description || '无描述' }}</p>
-          <span class="create-time">{{ formatDate(type.created_at) }}</span>
-        </div>
-        <div class="type-actions">
-          <button @click="editType(type)" class="btn-edit">编辑</button>
-          <button @click="deleteType(type.id)" class="btn-delete">删除</button>
-        </div>
-      </div>
-    </div>
-    
-    <div v-if="types.length === 0" class="empty-state">
-      <p>暂无课程类型</p>
+    <div v-if="loading" class="loading-state">
+      <p>正在加载分类数据...</p>
     </div>
 
-    <!-- 添加/编辑对话框 -->
-    <div v-if="showAddDialog || showEditDialog" class="dialog-overlay" @click="closeDialog">
-      <div class="dialog" @click.stop>
-        <h3>{{ showEditDialog ? '编辑类型' : '添加类型' }}</h3>
-        <form @submit.prevent="saveType">
-          <div class="form-group">
-            <label>类型名称</label>
-            <input v-model="formData.name" placeholder="请输入类型名称" required />
+    <div v-else class="category-grid">
+      <div v-for="(subTypes, mainCategory) in groupedTypes" :key="mainCategory" class="category-card card">
+        <div class="card-header">
+          <div class="header-title">
+            <span class="category-icon">{{ getCategoryIcon(String(mainCategory)) }}</span>
+            <h3>{{ mainCategory }}</h3>
           </div>
-          <div class="form-group">
-            <label>类型描述</label>
-            <textarea v-model="formData.description" placeholder="请输入类型描述" rows="3"></textarea>
+          <span class="count-badge">{{ subTypes.length }} 个细分项</span>
+        </div>
+        
+        <div class="card-body">
+          <div class="tags-container">
+            <div v-for="type in subTypes" :key="type.id" class="type-tag">
+              {{ type.name }}
+            </div>
           </div>
-          <div class="dialog-actions">
-            <button type="button" @click="closeDialog" class="btn-cancel">取消</button>
-            <button type="submit" class="btn-submit">保存</button>
-          </div>
-        </form>
+        </div>
       </div>
+    </div>
+    
+    <div v-if="!loading && Object.keys(groupedTypes).length === 0" class="empty-state card">
+      <p>暂无分类数据，请联系超级管理员运行初始化脚本</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 
 const types = ref<any[]>([])
-const showAddDialog = ref(false)
-const showEditDialog = ref(false)
-const formData = ref({ name: '', description: '' })
-const editingType = ref<number | null>(null)
+const loading = ref(true)
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleString('zh-CN')
+// 根据 description（大类名）对类型进行分组
+const groupedTypes = computed(() => {
+  const groups: Record<string, any[]> = {}
+  types.value.forEach(t => {
+    // 如果没有 description，归为"其他未分类"
+    const main = t.description || '其他未分类'
+    if (!groups[main]) {
+      groups[main] = []
+    }
+    groups[main].push(t)
+  })
+  return groups
+})
+
+// 为不同的大类分配简单的 Emoji 图标
+const getCategoryIcon = (category: string) => {
+  if (category.includes('课程')) return '📚'
+  if (category.includes('网络')) return '🌐'
+  if (category.includes('书籍')) return '📖'
+  return '📁'
 }
 
 const fetchTypes = async () => {
+  loading.value = true
   try {
     const token = localStorage.getItem('token')
     const response = await axios.get('http://127.0.0.1:8000/api/courses/types/', {
@@ -69,56 +76,9 @@ const fetchTypes = async () => {
     types.value = response.data
   } catch (error) {
     console.error('获取课程类型失败', error)
+  } finally {
+    loading.value = false
   }
-}
-
-const saveType = async () => {
-  try {
-    const token = localStorage.getItem('token')
-    const url = editingType.value 
-      ? `http://127.0.0.1:8000/api/courses/types/${editingType.value}/` 
-      : 'http://127.0.0.1:8000/api/courses/types/'
-    
-    const method = editingType.value ? 'put' : 'post'
-    await axios[method](url, formData.value, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    
-    closeDialog()
-    fetchTypes()
-    alert('保存成功')
-  } catch (error) {
-    alert('保存失败')
-  }
-}
-
-const editType = (type: any) => {
-  formData.value = { ...type }
-  editingType.value = type.id
-  showEditDialog.value = true
-  showAddDialog.value = false
-}
-
-const deleteType = async (id: number) => {
-  if (confirm('确定要删除这个类型吗？')) {
-    try {
-      const token = localStorage.getItem('token')
-      await axios.delete(`http://127.0.0.1:8000/api/courses/types/${id}/`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      fetchTypes()
-      alert('删除成功')
-    } catch (error) {
-      alert('删除失败')
-    }
-  }
-}
-
-const closeDialog = () => {
-  showAddDialog.value = false
-  showEditDialog.value = false
-  formData.value = { name: '', description: '' }
-  editingType.value = null
 }
 
 onMounted(() => {
@@ -127,26 +87,129 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container { padding: 20px; }
-.toolbar { margin-bottom: 20px; }
-.btn-add { padding: 8px 16px; background: #409eff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-.type-list { display: flex; flex-direction: column; gap: 15px; }
-.type-item { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: flex-start; }
-.type-info { flex: 1; }
-.type-info h3 { margin: 0 0 8px; color: #333; }
-.type-info p { margin: 0 0 8px; color: #666; }
-.create-time { font-size: 12px; color: #999; }
-.type-actions { display: flex; gap: 10px; }
-.btn-edit { padding: 6px 12px; background: #52c41a; color: white; border: none; border-radius: 4px; cursor: pointer; }
-.btn-delete { padding: 6px 12px; background: #ff4d4f; color: white; border: none; border-radius: 4px; cursor: pointer; }
-.empty-state { text-align: center; padding: 60px 20px; color: #999; }
-.dialog-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-.dialog { background: white; padding: 24px; border-radius: 8px; min-width: 400px; }
-.dialog h3 { margin: 0 0 16px; }
-.form-group { margin-bottom: 16px; }
-.form-group label { display: block; margin-bottom: 8px; color: #666; font-weight: 500; }
-.form-group input, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-.dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-.btn-cancel { padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; }
-.btn-submit { padding: 8px 16px; background: #409eff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+.page-container {
+  padding: var(--spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.page-header h2 {
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  font-family: var(--font-sf);
+}
+
+.subtitle {
+  color: var(--warning-color);
+  font-size: var(--font-size-sm);
+  background: rgba(245, 158, 11, 0.1);
+  padding: 8px 16px;
+  border-radius: var(--border-radius-md);
+  display: inline-block;
+}
+
+.loading-state, .empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-base);
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.card {
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  transition: all var(--transition-normal);
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-light);
+}
+
+.card-header {
+  padding: var(--spacing-lg);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.category-icon {
+  font-size: 24px;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.count-badge {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  padding: 4px 12px;
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.card-body {
+  padding: var(--spacing-lg);
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.type-tag {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  border-radius: var(--border-radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-fast);
+}
+
+.type-tag:hover {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.fade-in {
+  animation: fadeIn var(--transition-normal);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 </style>

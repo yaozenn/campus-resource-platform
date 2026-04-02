@@ -30,6 +30,10 @@ class Resource(models.Model):
     reject_reason = models.TextField(blank=True, verbose_name='拒绝原因')
     is_second_hand = models.BooleanField(default=False, verbose_name='是否二手')
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='价格')
+    
+    # 新增高级功能字段
+    rating = models.DecimalField(max_digits=3, decimal_places=2, default=5.0, verbose_name='资源评分')
+    rating_count = models.IntegerField(default=0, verbose_name='评分人数')
 
     def __str__(self):
         return self.title
@@ -40,6 +44,7 @@ class ResourceComment(models.Model):
     content = models.TextField()
     comment_date = models.DateTimeField(auto_now_add=True)
     reply = models.TextField(blank=True)
+    user_rating = models.IntegerField(default=5, verbose_name='用户评分')
 
     def __str__(self):
         return f"Comment by {self.user.username} on {self.resource.title}"
@@ -54,3 +59,21 @@ class ResourceCollection(models.Model):
 
     def __str__(self):
         return f"{self.user.username} collected {self.resource.title}"
+
+class ResourceReport(models.Model):
+    REASON_CHOICES = (
+        ('ad', '垃圾广告'),
+        ('copy', '侵权内容'),
+        ('bad', '内容违规'),
+        ('other', '其他原因'),
+    )
+    resource = models.ForeignKey(Resource, on_delete=models.CASCADE, related_name='reports', verbose_name='举报资源')
+    reporter = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='举报人')
+    reason = models.CharField(max_length=20, choices=REASON_CHOICES, verbose_name='举报原因')
+    description = models.TextField(blank=True, verbose_name='详细说明')
+    status = models.CharField(max_length=20, default='pending', choices=(
+        ('pending', '待处理'),
+        ('resolved', '已处理'),
+        ('ignored', '已忽略'),
+    ), verbose_name='处理状态')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='举报时间')

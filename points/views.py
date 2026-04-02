@@ -1,72 +1,61 @@
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from .models import PointsRecord, Prize, PrizeExchange
-from .serializers import PointsRecordSerializer, PrizeSerializer, PrizeExchangeSerializer, PrizeExchangeCreateSerializer
-from users.models import User
+from .models import PointRecord, Prize, PrizeExchange
+from .serializers import PointRecordSerializer, PrizeSerializer, PrizeExchangeSerializer
 
-class PointsRecordListView(generics.ListAPIView):
-    queryset = PointsRecord.objects.all()
-    serializer_class = PointsRecordSerializer
+# 1. 积分流水列表
+class PointRecordListView(generics.ListAPIView):
+    serializer_class = PointRecordSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        return PointRecord.objects.filter(user=self.request.user)
+
+# 2. 用户当前积分概览
 class UserPointsView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        user = request.user
-        records = PointsRecord.objects.filter(user=user)
-        serializer = PointsRecordSerializer(records, many=True)
         return Response({
-            'total_points': user.points,
-            'records': serializer.data
+            'username': request.user.username,
+            'points': request.user.points or 0
         })
 
+# 3. 奖品列表（公开）
 class PrizeListView(generics.ListAPIView):
-    queryset = Prize.objects.filter(is_active=True)
+    queryset = Prize.objects.all()
     serializer_class = PrizeSerializer
     permission_classes = [permissions.AllowAny]
 
+# 4. 提交兑换申请
 class PrizeExchangeView(generics.CreateAPIView):
-    serializer_class = PrizeExchangeCreateSerializer
+    serializer_class = PrizeExchangeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
-        user = request.user
         prize_id = request.data.get('prize')
-        
         try:
-            prize = Prize.objects.get(id=prize_id, is_active=True)
+            prize = Prize.objects.get(id=prize_id)
         except Prize.DoesNotExist:
-            return Response({'error': '奖品不存在'}, status=400)
-        
-        if prize.stock <= 0:
-            return Response({'error': '奖品库存不足'}, status=400)
-        
+            return Response({'error': '奖品不存在'}, status=404)
+
+        user = request.user
         if user.points < prize.points_required:
             return Response({'error': '积分不足'}, status=400)
         
-        user.points -= prize.points_required
-        user.save()
+        if prize.stock <= 0:
+            return Response({'error': '库存不足'}, status=400)
+
+        # 扣分并记流水
+        user.add_points(-prize.points_required, 'exchange', f"兑换奖品：{prize.name}")
         
         prize.stock -= 1
         prize.save()
-        
-        exchange = PrizeExchange.objects.create(
-            user=user,
-            prize=prize,
-            points_spent=prize.points_required,
-            status='pending'
-        )
-        
-        PointsRecord.objects.create(
-            user=user,
-            type='deduct',
-            points=prize.points_required,
-            reason=f'兑换奖品: {prize.name}'
-        )
-        
-        return Response(PrizeExchangeSerializer(exchange).data)
 
+        exchange = PrizeExchange.objects.create(user=user, prize=prize)
+        return Response(PrizeExchangeSerializer(exchange).data, status=201)
+
+# 5. 我的兑换记录
 class MyExchangesView(generics.ListAPIView):
     serializer_class = PrizeExchangeSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -74,31 +63,25 @@ class MyExchangesView(generics.ListAPIView):
     def get_queryset(self):
         return PrizeExchange.objects.filter(user=self.request.user)
 
+# 6. 管理员：所有兑换记录
 class AllExchangesView(generics.ListAPIView):
+    queryset = PrizeExchange.objects.all()
+    serializer_class = PrizeExchangeSerializer
+    permission_classes = [permissions.IsAuthenticated] # 实际应配合IsAdminUser
+
+# 7. 管理员：审批兑换
+class ExchangeApproveView(generics.UpdateAPIView):
     queryset = PrizeExchange.objects.all()
     serializer_class = PrizeExchangeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-class ExchangeApproveView(generics.UpdateAPIView):
-    queryset = PrizeExchange.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
-
     def update(self, request, *args, **kwargs):
         exchange = self.get_object()
-        action = request.data.get('action')
-        
-        if action == 'approve':
-            exchange.status = 'approved'
-        elif action == 'reject':
-            exchange.status = 'rejected'
-            exchange.user.points += exchange.points_spent
-            exchange.user.save()
-            exchange.prize.stock += 1
-            exchange.prize.save()
-        
+        exchange.status = request.data.get('status', 'completed')
         exchange.save()
         return Response(PrizeExchangeSerializer(exchange).data)
 
+# 8. 管理员：奖品管理（增删改）
 class PrizeManageView(generics.ListCreateAPIView):
     queryset = Prize.objects.all()
     serializer_class = PrizeSerializer
@@ -106,4 +89,5 @@ class PrizeManageView(generics.ListCreateAPIView):
 
 class PrizeDeleteView(generics.DestroyAPIView):
     queryset = Prize.objects.all()
+    serializer_class = PrizeSerializer
     permission_classes = [permissions.IsAuthenticated]
