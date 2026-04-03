@@ -87,6 +87,11 @@ class PrizeManageView(generics.ListCreateAPIView):
     serializer_class = PrizeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+class PrizeUpdateView(generics.UpdateAPIView):
+    queryset = Prize.objects.all()
+    serializer_class = PrizeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
 class PrizeDeleteView(generics.DestroyAPIView):
     queryset = Prize.objects.all()
     serializer_class = PrizeSerializer

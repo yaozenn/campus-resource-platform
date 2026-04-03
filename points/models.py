@@ -31,6 +31,7 @@ class Prize(models.Model):
     points_required = models.IntegerField(verbose_name='所需积分')
     stock = models.IntegerField(default=0, verbose_name='库存')
     image_url = models.URLField(blank=True, verbose_name='奖品图片')
+    is_active = models.BooleanField(default=True, verbose_name='是否上架')
 
     def __str__(self):
         return self.name

@@ -67,8 +67,11 @@ const uncollect = async (item: any) => {
       headers: { Authorization: `Bearer ${token}` }
     })
     collections.value = collections.value.filter(c => c.id !== item.id)
-  } catch (e) {
-    alert('操作失败')
+    alert('已取消收藏！')
+  } catch (e: any) {
+    console.error('取消收藏失败:', e)
+    const msg = e.response?.data?.detail || e.response?.data?.error || '取消失败，请稍后重试'
+    alert(msg)
   }
 }
 
@@ -80,7 +83,6 @@ const viewResource = (resource: any) => {
 const downloadResource = async (resource: any) => {
   if (!resource) return
   try {
-    // 检查是否有文件URL
     if (!resource.file_url) {
       alert('该资源暂无下载链接')
       return
@@ -88,15 +90,12 @@ const downloadResource = async (resource: any) => {
 
     const token = localStorage.getItem('token')
     
-    // 先调用下载统计API
     await axios.post(`http://127.0.0.1:8000/api/courses/${resource.id}/download/`, {}, {
       headers: { Authorization: `Bearer ${token}` }
     })
     
-    // 增加本地下载计数
     resource.downloads += 1
     
-    // 创建隐藏的a标签进行真实下载
     const link = document.createElement('a')
     link.href = resource.file_url
     link.target = '_blank'
@@ -108,7 +107,8 @@ const downloadResource = async (resource: any) => {
     alert('下载已开始！')
   } catch (e: any) {
     console.error('下载失败:', e)
-    alert(e.response?.data?.error || '下载失败，请稍后重试')
+    const msg = e.response?.data?.detail || e.response?.data?.error || '下载失败，请稍后重试'
+    alert(msg)
   }
 }
 

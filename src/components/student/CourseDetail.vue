@@ -6,7 +6,7 @@
     </div>
     
     <div v-else-if="!course" class="empty-state">
-      <div class="empty-icon">📦</div>
+      <IconFolder class="empty-icon" />
       <p>哎呀，该资源不存在或已被下架</p>
       <button @click="goBack" class="btn btn-primary mt-4">返回列表</button>
     </div>
@@ -43,7 +43,7 @@
             <div v-else class="cover-display" :class="getCoverClassByMain(course.type_name)">
               <div class="cover-overlay"></div>
               <div class="cover-content">
-                <span class="cover-icon">{{ getCoverIcon(course.type_name) }}</span>
+                <component :is="getCoverIconComponent(course.type_name)" class="cover-icon" />
                 <span class="cover-text">{{ course.type_name || '未分类资源' }}</span>
               </div>
               <div v-if="course.is_second_hand" class="second-hand-badge">二手闲置 ¥{{ course.price }}</div>
@@ -51,24 +51,26 @@
             
             <div class="action-toolbar">
               <button v-if="!isVideo && !isPreviewing" @click="togglePreview" class="btn-action btn-outline-primary">
-                <span class="action-icon">👁️</span> 免费预览
+                <IconEye class="action-icon" /> 免费预览
               </button>
               <button v-if="isPreviewing" @click="isPreviewing = false" class="btn-action btn-outline-primary">
-                <span class="action-icon">🔙</span> 退出预览
+                <IconArrowLeft class="action-icon" /> 退出预览
               </button>
 
               <button @click="downloadCourse" class="btn-action btn-primary">
-                <span class="action-icon">⬇️</span> 下载原件
+                <IconDownload class="action-icon" /> 下载原件
               </button>
               <button @click="toggleCollect" :class="['btn-action', isCollected ? 'btn-success' : 'btn-outline']">
-                <span class="action-icon">{{ isCollected ? '⭐' : '☆' }}</span> 
+                <IconHeart class="action-icon" :class="{ filled: isCollected }" /> 
                 {{ isCollected ? '已收藏' : '加入收藏' }}
               </button>
             </div>
           </div>
           
           <div class="comments-section card">
-            <h3 class="section-title">💬 讨论交流 ({{ comments.length }})</h3>
+            <h3 class="section-title">
+              <IconMessageCircle class="section-title-icon" /> 讨论交流 ({{ comments.length }})
+            </h3>
             
             <div class="comment-form">
               <textarea 
@@ -110,14 +112,14 @@
             
             <div class="rating-display">
               <div class="stars">
-                <span 
+                <IconStar 
                   v-for="star in 5" 
                   :key="star" 
                   @click="submitRating(star)"
                   class="star-item"
                   :class="{ active: star <= (userRating || course.rating || 0) }"
                   title="点击打分"
-                >★</span>
+                />
               </div>
               <span class="rating-text">
                 {{ course.rating ? `${course.rating} 分` : '暂无评分' }} 
@@ -132,7 +134,7 @@
               </div>
               <div class="meta-item">
                 <span class="meta-label">上传作者</span>
-                <span class="meta-value">{{ course.uploader?.name || course.uploader?.username }}</span>
+                <span class="meta-value">{{ course.uploader_name || course.uploader_username || course.uploader_info?.name || course.uploader_info?.username || course.uploader?.name || course.uploader?.username }}</span>
               </div>
               <div class="meta-item">
                 <span class="meta-label">下载热度</span>
@@ -145,21 +147,25 @@
             </div>
             
             <div class="course-description">
-              <h3>📖 资源描述</h3>
+              <h3>
+                <IconBookOpen class="section-icon" /> 资源描述
+              </h3>
               <p>{{ course.description || '这位同学很懒，没有留下详细描述~' }}</p>
             </div>
 
             <div class="report-wrapper">
               <button @click="showReportModal = true" class="btn-report">
-                🚨 发现违规、侵权或低俗内容？点击举报
+                <IconAlertCircle class="report-icon" /> 发现违规、侵权或低俗内容？点击举报
               </button>
             </div>
             
             <div v-if="relatedCourses.length > 0" class="related-section">
-              <h3 class="section-title-small">📚 猜你需要</h3>
+              <h3 class="section-title-small">
+                <IconBook class="section-icon" /> 猜你需要
+              </h3>
               <div class="related-list">
                 <div v-for="related in relatedCourses" :key="related.id" class="related-item" @click="viewCourse(related.id)">
-                  <span class="related-icon">{{ getCoverIcon(related.type_name) }}</span>
+                  <component :is="getCoverIconComponent(related.type_name)" class="related-icon" />
                   <div class="related-info">
                     <h4 class="text-truncate">{{ related.title }}</h4>
                     <p>{{ related.downloads }} 次下载</p>
@@ -175,8 +181,12 @@
     <div v-if="showReportModal" class="modal-overlay" @click="showReportModal = false">
       <div class="modal-card slide-up" @click.stop>
         <div class="modal-header">
-          <h3>🚨 举报该资源</h3>
-          <button @click="showReportModal = false" class="btn-close-icon">✖</button>
+          <h3>
+            <IconAlertCircle class="modal-icon" /> 举报该资源
+          </h3>
+          <button @click="showReportModal = false" class="btn-close-icon">
+            <IconClose class="close-icon" />
+          </button>
         </div>
         <div class="modal-body">
           <div class="form-group">
@@ -209,7 +219,11 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import { formatTime } from '../../utils/timeFormat'
-import { IconArrowLeft } from '../../components/icons'
+import { 
+  IconArrowLeft, IconDownload, IconEye, IconHeart, IconStar, 
+  IconMessageCircle, IconBookOpen, IconAlertCircle, IconFolder,
+  IconDocument, IconVideo, IconFile, IconClose, IconBook
+} from '../../components/icons'
 
 const route = useRoute()
 const router = useRouter()
@@ -236,13 +250,13 @@ const isVideo = computed(() => {
 })
 
 // UI 辅助函数
-const getCoverIcon = (typeName: string) => {
-  if (!typeName) return '📦'
-  if (typeName.includes('课件') || typeName.includes('笔记')) return '📝'
-  if (typeName.includes('视频') || typeName.includes('链接')) return '🎬'
-  if (typeName.includes('书') || typeName.includes('资料')) return '📚'
-  if (typeName.includes('真题') || typeName.includes('报告')) return '📊'
-  return '📁'
+const getCoverIconComponent = (typeName: string) => {
+  if (!typeName) return IconFolder
+  if (typeName.includes('课件') || typeName.includes('笔记')) return IconDocument
+  if (typeName.includes('视频') || typeName.includes('链接')) return IconVideo
+  if (typeName.includes('书') || typeName.includes('资料')) return IconBook
+  if (typeName.includes('真题') || typeName.includes('报告')) return IconFile
+  return IconFolder
 }
 
 const getCoverClassByMain = (typeName: string) => {
@@ -321,17 +335,32 @@ const submitReport = async () => {
 }
 
 const submitComment = async () => {
-  if (!newComment.value.trim()) return alert('请输入评论内容')
+  console.log('submitComment called, newComment:', newComment.value)
+  if (!newComment.value.trim()) {
+    alert('请输入评论内容')
+    return
+  }
   submitting.value = true
   try {
     const token = localStorage.getItem('token')
-    await axios.post(`http://127.0.0.1:8000/api/courses/${courseId.value}/comments/`, { content: newComment.value }, { headers: { Authorization: `Bearer ${token}` } })
+    console.log('Token:', token ? 'exists' : 'missing')
+    console.log('Course ID:', courseId.value)
+    const response = await axios.post(`http://127.0.0.1:8000/api/courses/${courseId.value}/comments/`, 
+      { content: newComment.value, user_rating: 5 }, 
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    console.log('Comment posted successfully:', response.data)
     newComment.value = ''
     await fetchComments()
+    alert('评论成功！')
   } catch (error: any) {
-    alert('评论失败：' + (error.response?.data?.message || '未知错误'))
+    console.error('评论错误:', error)
+    console.error('错误详情:', error.response?.data)
+    console.error('错误状态码:', error.response?.status)
+    alert('评论失败：' + (error.response?.data?.detail || error.response?.data?.error || JSON.stringify(error.response?.data) || error.message || '未知错误'))
   } finally {
     submitting.value = false
+    console.log('submitComment finished')
   }
 }
 
@@ -427,13 +456,14 @@ onMounted(() => {
 
 .cover-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.4) 100%); }
 .cover-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 16px; }
-.cover-icon { font-size: 96px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2)); }
+.cover-icon { width: 96px; height: 96px; color: white; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2)); }
 .cover-text { color: white; font-size: 16px; font-weight: 600; padding: 6px 20px; background: rgba(255,255,255,0.2); backdrop-filter: blur(8px); border-radius: 20px; }
 .second-hand-badge { position: absolute; top: 20px; right: 20px; background: #f59e0b; color: white; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 16px; z-index: 2; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
 
 /* 操作工具栏 */
 .action-toolbar { display: flex; padding: 20px; gap: 16px; background: var(--bg-primary); }
 .btn-action { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: var(--border-radius-md); font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+.action-icon { width: 20px; height: 20px; }
 .btn-primary { background: var(--primary-color); color: white; }
 .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3); }
 .btn-outline-primary { background: transparent; border-color: var(--primary-color); color: var(--primary-color); }
@@ -442,14 +472,34 @@ onMounted(() => {
 .btn-outline { background: transparent; border-color: var(--border-color); color: var(--text-secondary); }
 .btn-outline:hover { border-color: var(--primary-color); color: var(--primary-color); }
 
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 40px; }
+.empty-icon { width: 80px; height: 80px; color: var(--text-tertiary); margin-bottom: 16px; }
+
+.section-title { font-size: 18px; font-weight: 600; margin: 0 0 20px; display: flex; align-items: center; gap: 8px; }
+.section-title-icon { width: 20px; height: 20px; }
+
+.section-icon { width: 18px; height: 18px; margin-right: 6px; }
+
+.stars { display: flex; gap: 4px; }
+.star-item { width: 24px; height: 24px; color: #d1d5db; cursor: pointer; transition: color 0.2s; }
+.star-item.active, .star-item:hover { color: #f59e0b; fill: #f59e0b; }
+
+.related-icon { width: 24px; height: 24px; background: white; color: var(--primary-color); }
+
+.report-icon { width: 16px; height: 16px; margin-right: 4px; }
+
+.modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; background: #fff1f2; }
+.modal-header h3 { margin: 0; font-size: 16px; color: #e11d48; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.modal-icon { width: 20px; height: 20px; }
+.btn-close-icon { background: none; border: none; cursor: pointer; padding: 4px; }
+.close-icon { width: 20px; height: 20px; color: #f43f5e; }
+
 /* 右侧信息面板 */
 .info-card { padding: 30px; }
 .course-title { font-size: 24px; font-weight: 700; color: var(--text-primary); margin: 0 0 16px; line-height: 1.4; }
 
 /* 星级评分 */
 .rating-display { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px dashed var(--border-light); }
-.stars { display: flex; gap: 4px; font-size: 24px; color: #d1d5db; cursor: pointer; }
-.star-item.active, .star-item:hover { color: #f59e0b; }
 .rating-text { font-size: 16px; font-weight: 700; color: #f59e0b; }
 .rating-hint { font-size: 12px; color: var(--text-tertiary); font-weight: 400; margin-left: 8px; }
 
@@ -462,26 +512,24 @@ onMounted(() => {
 .text-orange { color: #d97706; }
 
 /* 描述与举报 */
-.course-description h3 { font-size: 16px; font-weight: 600; margin: 0 0 12px; }
+.course-description h3 { font-size: 16px; font-weight: 600; margin: 0 0 12px; display: flex; align-items: center; }
 .course-description p { color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin: 0; background: var(--bg-secondary); padding: 16px; border-radius: var(--border-radius-md); }
 .report-wrapper { margin-top: 24px; text-align: center; }
-.btn-report { background: transparent; border: none; color: var(--text-tertiary); font-size: 13px; text-decoration: underline; cursor: pointer; transition: color 0.2s; }
+.btn-report { background: transparent; border: none; color: var(--text-tertiary); font-size: 13px; text-decoration: underline; cursor: pointer; transition: color 0.2s; display: inline-flex; align-items: center; }
 .btn-report:hover { color: #ef4444; }
 
 /* 猜你需要 (相关资源) */
 .related-section { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--border-light); }
-.section-title-small { font-size: 16px; font-weight: 600; margin: 0 0 16px; }
+.section-title-small { font-size: 16px; font-weight: 600; margin: 0 0 16px; display: flex; align-items: center; }
 .related-list { display: flex; flex-direction: column; gap: 12px; }
 .related-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-secondary); border-radius: var(--border-radius-md); cursor: pointer; transition: all 0.2s; }
 .related-item:hover { background: var(--bg-tertiary); border: 1px solid var(--primary-light); }
-.related-icon { font-size: 24px; background: white; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
 .related-info h4 { margin: 0 0 4px; font-size: 14px; font-weight: 500; color: var(--text-primary); }
 .related-info p { margin: 0; font-size: 12px; color: var(--text-secondary); }
 .text-truncate { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 
 /* 评论区 */
 .comments-section { padding: 30px; }
-.section-title { font-size: 18px; font-weight: 600; margin: 0 0 20px; }
 .input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--border-radius-md); font-size: 14px; background: var(--bg-secondary); outline: none; transition: all 0.2s; }
 .input:focus { border-color: var(--primary-color); background: var(--bg-primary); }
 .comment-actions { display: flex; justify-content: flex-end; margin-top: 12px; margin-bottom: 30px; }
@@ -497,9 +545,6 @@ onMounted(() => {
 /* 弹窗样式 */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
 .modal-card { background: var(--bg-primary); width: 100%; max-width: 440px; border-radius: var(--border-radius-xl); box-shadow: var(--shadow-xl); overflow: hidden; }
-.modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; background: #fff1f2; }
-.modal-header h3 { margin: 0; font-size: 16px; color: #e11d48; font-weight: 600; }
-.btn-close-icon { background: none; border: none; color: #f43f5e; font-size: 18px; cursor: pointer; }
 .modal-body { padding: 24px; }
 .form-group { display: flex; flex-direction: column; gap: 8px; }
 .form-group label { font-size: 14px; font-weight: 500; color: var(--text-secondary); }

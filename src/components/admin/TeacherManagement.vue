@@ -19,7 +19,6 @@
             <th>手机号</th>
             <th>学科</th>
             <th>部门</th>
-            <th>积分</th>
             <th>操作</th>
           </tr>
         </thead>
@@ -32,7 +31,6 @@
             <td>{{ teacher.phone || '-' }}</td>
             <td>{{ teacher.subject || '-' }}</td>
             <td>{{ teacher.department || '-' }}</td>
-            <td><span class="points-badge">{{ teacher.points }}</span></td>
             <td>
               <div class="actions">
                 <button @click="editTeacher(teacher)" class="btn-edit">编辑</button>
@@ -41,7 +39,7 @@
             </td>
           </tr>
           <tr v-if="filteredTeachers.length === 0">
-            <td colspan="9" class="empty-row">暂无数据</td>
+            <td colspan="8" class="empty-row">暂无数据</td>
           </tr>
         </tbody>
       </table>
@@ -99,15 +97,9 @@
               <input v-model="currentTeacher.department" placeholder="请输入部门" />
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>个性签名</label>
-              <input v-model="currentTeacher.signature" placeholder="请输入个性签名" />
-            </div>
-            <div class="form-group">
-              <label>积分</label>
-              <input v-model.number="currentTeacher.points" type="number" min="0" placeholder="积分" />
-            </div>
+          <div class="form-group">
+            <label>个性签名</label>
+            <input v-model="currentTeacher.signature" placeholder="请输入个性签名" />
           </div>
           <div class="dialog-actions">
             <button type="button" @click="closeDialog" class="btn-cancel">取消</button>
@@ -129,7 +121,7 @@ const showAddDialog = ref(false)
 const showEditDialog = ref(false)
 const currentTeacher = ref({
   username: '', password: '', employee_id: '', name: '',
-  gender: '', phone: '', signature: '', subject: '', department: '', points: 0
+  gender: '', phone: '', signature: '', subject: '', department: ''
 })
 
 const filteredTeachers = computed(() => {
@@ -167,7 +159,7 @@ const closeDialog = () => {
   showEditDialog.value = false
   currentTeacher.value = {
     username: '', password: '', employee_id: '', name: '',
-    gender: '', phone: '', signature: '', subject: '', department: '', points: 0
+    gender: '', phone: '', signature: '', subject: '', department: ''
   }
 }
 
@@ -269,15 +261,6 @@ onMounted(fetchTeachers)
 .data-table tbody tr:hover { background: #fafbff; }
 .data-table tbody tr:last-child td { border-bottom: none; }
 
-.points-badge {
-  display: inline-block;
-  padding: 3px 10px;
-  background: #fdf6ec;
-  color: #e6a23c;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-}
 .empty-row { text-align: center; color: #c0c4cc; padding: 40px; }
 
 .actions { display: flex; gap: 8px; }
@@ -326,7 +309,7 @@ onMounted(fetchTeachers)
 
 .dialog-form { padding: 20px 24px 24px; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
 .form-group label { font-size: 13px; font-weight: 600; color: #606266; }
 .required { color: #f56c6c; }
 .form-group input, .form-group select {

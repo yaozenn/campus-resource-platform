@@ -69,7 +69,7 @@
         <div class="prizes-grid">
           <div v-for="prize in prizes" :key="prize.id" class="prize-card card">
             <div class="prize-image-wrapper">
-              <img v-if="prize.image" :src="prize.image" :alt="prize.name" class="prize-image" />
+              <img v-if="prize.image_url" :src="prize.image_url" :alt="prize.name" class="prize-image" />
               <div v-else class="prize-placeholder">
                 <IconGift class="placeholder-icon" />
               </div>

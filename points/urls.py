@@ -10,5 +10,6 @@ urlpatterns = [
     path('all-exchanges/', views.AllExchangesView.as_view(), name='all_exchanges'),
     path('approve/<int:pk>/', views.ExchangeApproveView.as_view(), name='exchange_approve'),
     path('manage/', views.PrizeManageView.as_view(), name='prize_manage'),
+    path('manage/<int:pk>/', views.PrizeUpdateView.as_view(), name='prize_update'),
     path('delete/<int:pk>/', views.PrizeDeleteView.as_view(), name='prize_delete'),
 ]

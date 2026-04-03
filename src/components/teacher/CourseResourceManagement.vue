@@ -370,8 +370,8 @@ const editCourse = (course: any) => {
     points_required: course.points_required || 0,
     is_second_hand: course.is_second_hand || false,
     price: course.price || 0,
-    cover_image: course.cover_image || '',
-    visibility: course.visibility || 'public'
+    cover_image: '',
+    visibility: 'public'
   }
   showEditDialog.value = true
 }
@@ -406,14 +406,12 @@ const saveCourse = async () => {
 
     const submitData = {
       title: currentCourse.value.title,
-      type: typeId,
+      type_id: typeId,
       description: currentCourse.value.description,
       file_url: currentCourse.value.file_url,
       points_required: currentCourse.value.points_required,
       is_second_hand: currentCourse.value.is_second_hand,
-      price: currentCourse.value.price,
-      cover_image: currentCourse.value.cover_image,
-      visibility: currentCourse.value.visibility
+      price: currentCourse.value.price
     }
 
     console.log('Submitting data:', submitData)

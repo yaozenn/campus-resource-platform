@@ -6,69 +6,47 @@
     </h2>
 
     <div class="stats-grid">
-      <div class="stat-card primary" @click="goToUserOverview">
-        <div class="stat-icon">
-          <IconUsers class="icon-svg" />
-        </div>
-        <div class="stat-body">
+      <div @click="goToUserOverview" class="stat-card primary">
+        <div class="stat-icon"><IconUsers class="icon-svg" /></div>
+        <div class="stat-content">
           <div class="stat-num">{{ stats.totalUsers }}</div>
           <div class="stat-label">用户总数</div>
         </div>
       </div>
-      <div class="stat-card success" @click="goToResourceOverview">
-        <div class="stat-icon">
-          <IconBookOpen class="icon-svg" />
-        </div>
-        <div class="stat-body">
+      <div @click="goToResourceOverview" class="stat-card success">
+        <div class="stat-icon"><IconBookOpen class="icon-svg" /></div>
+        <div class="stat-content">
           <div class="stat-num">{{ stats.totalCourses }}</div>
           <div class="stat-label">资源总数</div>
         </div>
       </div>
-      <div class="stat-card warning" @click="goToForumOverview">
-        <div class="stat-icon">
-          <IconMessageCircle class="icon-svg" />
-        </div>
-        <div class="stat-body">
+      <div @click="goToForumOverview" class="stat-card warning">
+        <div class="stat-icon"><IconMessageCircle class="icon-svg" /></div>
+        <div class="stat-content">
           <div class="stat-num">{{ stats.totalPosts }}</div>
-          <div class="stat-label">论坛帖子</div>
-        </div>
-      </div>
-      <div class="stat-card danger">
-        <div class="stat-icon">
-          <IconGift class="icon-svg" />
-        </div>
-        <div class="stat-body">
-          <div class="stat-num">{{ stats.totalPoints }}</div>
-          <div class="stat-label">积分总量</div>
+          <div class="stat-label">帖子总数</div>
         </div>
       </div>
     </div>
 
     <div class="charts-row">
       <div class="chart-card">
-        <h3 class="chart-title">用户角色分布</h3>
+        <h3 class="chart-title">用户分布</h3>
         <div class="pie-wrap">
-          <svg viewBox="0 0 200 200" class="pie-svg">
-            <circle
-              v-for="(seg, i) in pieSegments"
-              :key="i"
-              cx="100" cy="100" r="70"
-              fill="none"
-              :stroke="seg.color"
-              stroke-width="40"
-              :stroke-dasharray="`${seg.dash} ${circumference}`"
-              :stroke-dashoffset="-seg.offset"
-              transform="rotate(-90 100 100)"
-            />
-            <circle cx="100" cy="100" r="50" fill="white" />
-            <text x="100" y="96" text-anchor="middle" class="pie-center-num">{{ stats.totalUsers }}</text>
-            <text x="100" y="112" text-anchor="middle" class="pie-center-label">总用户</text>
+          <svg class="pie-svg" viewBox="0 0 160 160">
+            <circle cx="80" cy="80" r="70" fill="none" :stroke-width="20" stroke="var(--bg-tertiary)" />
+            <circle v-for="seg in pieSegments" :key="seg.name" cx="80" cy="80" r="70" fill="none"
+              :stroke="seg.color" :stroke-width="20" :stroke-dasharray="`${seg.dash} ${circumference}`"
+              :stroke-dashoffset="circumference - seg.offset" :style="{ transition: 'stroke-dashoffset 0.6s ease' }"
+              transform="rotate(-90 80 80)" />
+            <text x="80" y="75" text-anchor="middle" class="pie-center-num">{{ stats.totalUsers }}</text>
+            <text x="80" y="95" text-anchor="middle" class="pie-center-label">总用户</text>
           </svg>
           <div class="pie-legend">
-            <div v-for="(seg, i) in pieSegments" :key="i" class="legend-row">
-              <span class="legend-dot" :style="{ background: seg.color }"></span>
+            <div v-for="seg in pieSegments" :key="seg.name" class="legend-row">
+              <div class="legend-dot" :style="{ backgroundColor: seg.color }"></div>
               <span class="legend-name">{{ seg.name }}</span>
-              <span class="legend-count">{{ seg.count }} 人</span>
+              <span class="legend-count">{{ seg.count }}</span>
               <span class="legend-pct">{{ seg.pct }}%</span>
             </div>
           </div>
@@ -76,79 +54,74 @@
       </div>
 
       <div class="chart-card">
-        <h3 class="chart-title">热门资源 TOP 5</h3>
-        <div class="bar-list">
+        <h3 class="chart-title">资源主分类分布</h3>
+        <div class="pie-wrap">
+          <svg class="pie-svg" viewBox="0 0 160 160">
+            <circle cx="80" cy="80" r="70" fill="none" :stroke-width="20" stroke="var(--bg-tertiary)" />
+            <circle v-for="seg in mainCategorySegments" :key="seg.name" cx="80" cy="80" r="70" fill="none"
+              :stroke="seg.color" :stroke-width="20" :stroke-dasharray="`${seg.dash} ${circumference}`"
+              :stroke-dashoffset="circumference - seg.offset" :style="{ transition: 'stroke-dashoffset 0.6s ease' }"
+              transform="rotate(-90 80 80)" />
+            <text x="80" y="75" text-anchor="middle" class="pie-center-num">{{ stats.totalCourses }}</text>
+            <text x="80" y="95" text-anchor="middle" class="pie-center-label">总资源</text>
+          </svg>
+          <div class="pie-legend">
+            <div v-for="seg in mainCategorySegments" :key="seg.name" class="legend-row">
+              <div class="legend-dot" :style="{ backgroundColor: seg.color }"></div>
+              <span class="legend-name">{{ seg.name }}</span>
+              <span class="legend-count">{{ seg.count }}</span>
+              <span class="legend-pct">{{ seg.pct }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3 class="chart-title">热门资源 (下载量)</h3>
+        <div class="bar-list" v-if="topCourses.length > 0">
           <div v-for="(course, i) in topCourses" :key="course.id" class="bar-item">
             <div class="bar-rank" :class="`rank-${i+1}`">{{ i + 1 }}</div>
             <div class="bar-info">
               <div class="bar-name">{{ course.title }}</div>
               <div class="bar-track">
-                <div
-                  class="bar-fill"
-                  :style="{ width: barWidth(course.downloads) + '%', background: barColor(i) }"
-                ></div>
+                <div class="bar-fill" :style="{ width: `${barWidth(course.downloads)}%`, backgroundColor: barColor(i) }"></div>
               </div>
             </div>
-            <div class="bar-value">{{ course.downloads }}<span class="bar-unit">次</span></div>
-          </div>
-          <div v-if="topCourses.length === 0" class="empty-tip">暂无数据</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="charts-row">
-      <div class="chart-card">
-        <h3 class="chart-title">资源类型分布</h3>
-        <div class="pie-wrap">
-          <svg viewBox="0 0 200 200" class="pie-svg">
-            <circle
-              v-for="(seg, i) in resourceTypeSegments"
-              :key="i"
-              cx="100" cy="100" r="70"
-              fill="none"
-              :stroke="seg.color"
-              stroke-width="40"
-              :stroke-dasharray="`${seg.dash} ${circumference}`"
-              :stroke-dashoffset="-seg.offset"
-              transform="rotate(-90 100 100)"
-            />
-            <circle cx="100" cy="100" r="50" fill="white" />
-            <text x="100" y="96" text-anchor="middle" class="pie-center-num">{{ stats.totalCourses }}</text>
-            <text x="100" y="112" text-anchor="middle" class="pie-center-label">总资源</text>
-          </svg>
-          <div class="pie-legend">
-            <div v-for="(seg, i) in resourceTypeSegments" :key="i" class="legend-row">
-              <span class="legend-dot" :style="{ background: seg.color }"></span>
-              <span class="legend-name">{{ seg.name }}</span>
-              <span class="legend-count">{{ seg.count }} 个</span>
-              <span class="legend-pct">{{ seg.pct }}%</span>
+            <div>
+              <span class="bar-value">{{ course.downloads }}</span>
+              <span class="bar-unit">次</span>
             </div>
           </div>
         </div>
+        <div v-else class="empty-tip">暂无数据</div>
       </div>
 
       <div class="chart-card">
-        <h3 class="chart-title">资源分类柱状图</h3>
+        <h3 class="chart-title">资源细分类型分布</h3>
         <div class="vertical-bar-chart">
           <div class="v-grid-lines">
             <div class="v-grid-line"></div>
             <div class="v-grid-line"></div>
             <div class="v-grid-line"></div>
             <div class="v-grid-line"></div>
+            <div class="v-grid-line"></div>
           </div>
-          
-          <div class="v-bars-container">
-            <div v-for="(seg, i) in resourceTypeSegments" :key="i" class="v-bar-item">
-              <div class="v-bar-value" :style="{ color: seg.color }">{{ seg.count }}</div>
-              <div class="v-bar-track">
-                <div
-                  class="v-bar-fill"
-                  :style="{ height: Math.max(seg.pct, 2) + '%', background: seg.color }"
-                ></div>
+          <div class="v-bars-container" v-if="resourceTypeList.length > 0">
+            <div v-for="(item, index) in resourceTypeList" :key="item.name" class="v-bar-item">
+              <div class="v-bar-track" style="height: 160px;">
+                <div class="v-bar-fill" :style="{ 
+                  height: item.height + '%', 
+                  backgroundColor: barColors[index % barColors.length] 
+                }">
+                </div>
               </div>
-              <div class="v-bar-label">{{ seg.name }}</div>
+              <div class="v-bar-label" :title="item.name">{{ item.name }}</div>
+              <div class="v-bar-value">{{ item.count }}</div>
             </div>
           </div>
+          <div v-else class="empty-tip" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">暂无数据</div>
         </div>
       </div>
     </div>
@@ -158,7 +131,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { IconUsers, IconBookOpen, IconMessageCircle, IconGift, IconClipboard } from '@/components/icons'
+import { IconUsers, IconBookOpen, IconMessageCircle, IconClipboard } from '@/components/icons'
 
 const router = useRouter()
 
@@ -171,7 +144,8 @@ const stats = ref({
 
 const userDistribution = ref({ students: 0, teachers: 0, admins: 0 })
 const topCourses = ref<any[]>([])
-const resourceTypeDistribution = ref({ video: 0, document: 0, course: 0, other: 0 })
+const resourceTypeDistribution = ref<Record<string, number>>({})
+const mainCategoryDistribution = ref<Record<string, number>>({})
 
 const circumference = 2 * Math.PI * 70
 
@@ -194,30 +168,37 @@ const pieSegments = computed(() => {
 
 const maxDownloads = computed(() => Math.max(...topCourses.value.map(c => c.downloads), 1))
 const barWidth = (downloads: number) => Math.max((downloads / maxDownloads.value) * 100, 4)
-const barColors = ['#409eff', '#67c23a', '#e6a23c', '#9b59b6', '#e74c3c']
-const barColor = (i: number) => barColors[i] || '#409eff'
+const barColors = ['#409eff', '#67c23a', '#e6a23c', '#9b59b6', '#e74c3c', '#00bcd4', '#ff9800', '#8bc34a']
+const barColor = (i: number) => barColors[i % barColors.length]
 
-const avgPoints = computed(() => {
-  if (!stats.value.totalUsers) return 0
-  return Math.round(stats.value.totalPoints / stats.value.totalUsers)
-})
-
-const resourceTypeSegments = computed(() => {
+const mainCategorySegments = computed(() => {
   const total = stats.value.totalCourses || 1
-  const items = [
-    { name: '视频', count: resourceTypeDistribution.value.video, color: '#409eff' },
-    { name: '文档', count: resourceTypeDistribution.value.document, color: '#10b981' },
-    { name: '课程', count: resourceTypeDistribution.value.course, color: '#f59e0b' },
-    { name: '其他', count: resourceTypeDistribution.value.other, color: '#8b5cf6' },
-  ]
+  const items = Object.entries(mainCategoryDistribution.value).map(([name, count]) => ({
+    name,
+    count
+  }))
+  
+  const colors = ['#409eff', '#10b981', '#f59e0b', '#8b5cf6']
   let offset = 0
-  return items.map(item => {
+  return items.map((item, index) => {
     const pct = Math.round((item.count / total) * 100)
     const dash = (item.count / total) * circumference
-    const seg = { ...item, pct, dash, offset }
+    const seg = { ...item, pct, dash, offset, color: colors[index % colors.length] }
     offset += dash
     return seg
   })
+})
+
+const resourceTypeList = computed(() => {
+  const items = Object.entries(resourceTypeDistribution.value)
+    .map(([name, count]) => ({ name, count }))
+    .filter(item => item.count > 0)
+  
+  const maxCount = Math.max(...items.map(i => i.count), 1)
+  return items.map(item => ({
+    ...item,
+    height: (item.count / maxCount) * 100
+  }))
 })
 
 const fetchStats = async () => {
@@ -231,6 +212,9 @@ const fetchStats = async () => {
       
       if (data.resourceTypeDistribution) {
         resourceTypeDistribution.value = data.resourceTypeDistribution
+      }
+      if (data.mainCategoryDistribution) {
+        mainCategoryDistribution.value = data.mainCategoryDistribution
       }
     }
   } catch (e) {
@@ -257,8 +241,7 @@ onMounted(fetchStats)
 .page-container { padding: var(--spacing-lg); }
 .page-container h2 { margin: 0 0 var(--spacing-lg); font-size: var(--font-size-2xl); font-weight: 600; color: var(--text-primary); font-family: var(--font-sf); }
 
-/* 统计卡片 */
-.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-md); margin-bottom: var(--spacing-lg); }
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-md); margin-bottom: var(--spacing-lg); }
 .stat-card { background: var(--bg-primary); border-radius: var(--border-radius-lg); padding: var(--spacing-lg); display: flex; align-items: center; gap: var(--spacing-md); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); border-left: 4px solid transparent; transition: all var(--transition-normal); cursor: pointer; }
 .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .stat-card.primary { border-left-color: var(--primary-color); }
@@ -279,13 +262,11 @@ onMounted(fetchStats)
 .stat-num { font-size: 30px; font-weight: 700; color: var(--text-primary); line-height: 1; font-family: var(--font-sf); }
 .stat-label { font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: 6px; }
 
-/* 图表行 */
 .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); margin-bottom: var(--spacing-md); }
 .chart-card { background: var(--bg-primary); border-radius: var(--border-radius-lg); padding: var(--spacing-lg); border: 1px solid var(--border-light); box-shadow: var(--shadow-sm); transition: box-shadow var(--transition-normal); }
 .chart-card:hover { box-shadow: var(--shadow-md); }
 .chart-title { margin: 0 0 var(--spacing-lg); font-size: 16px; font-weight: 600; color: var(--text-primary); font-family: var(--font-sf); }
 
-/* 饼图 */
 .pie-wrap { display: flex; align-items: center; justify-content: center; gap: 30px; height: 200px; }
 .pie-svg { width: 160px; height: 160px; flex-shrink: 0; }
 .pie-center-num { font-size: 24px; font-weight: 700; fill: var(--text-primary); font-family: var(--font-sf); }
@@ -297,7 +278,6 @@ onMounted(fetchStats)
 .legend-count { width: 40px; font-size: 14px; font-weight: 600; color: var(--text-primary); }
 .legend-pct { font-size: 12px; color: var(--text-tertiary); text-align: right; width: 40px; }
 
-/* 基础条形图(热门资源) */
 .bar-list { display: flex; flex-direction: column; gap: 16px; height: 200px; justify-content: center; }
 .bar-item { display: flex; align-items: center; gap: 12px; }
 .bar-rank { width: 24px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; color: white; background: var(--text-tertiary); }
@@ -312,8 +292,6 @@ onMounted(fetchStats)
 .bar-unit { font-size: 12px; color: var(--text-tertiary); margin-left: 2px; font-weight: 400; }
 .empty-tip { text-align: center; color: var(--text-tertiary); padding: 20px; }
 
-
-/* ---------------- 新增：垂直柱状图样式 ---------------- */
 .vertical-bar-chart {
   position: relative;
   height: 200px;
@@ -321,14 +299,12 @@ onMounted(fetchStats)
   display: flex;
   flex-direction: column;
 }
-
-/* 虚线背景网格 */
 .v-grid-lines {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 24px; /* 留出底部标签空间 */
+  bottom: 34px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -338,8 +314,6 @@ onMounted(fetchStats)
   border-top: 1px dashed var(--border-color);
   width: 100%;
 }
-
-/* 柱子容器区 */
 .v-bars-container {
   position: relative;
   z-index: 2;
@@ -347,53 +321,41 @@ onMounted(fetchStats)
   display: flex;
   justify-content: space-around;
   align-items: flex-end;
-  border-bottom: 1px solid var(--border-dark);
-  padding-bottom: 4px; /* 柱子和底线的间距 */
-  margin-bottom: 24px; /* 为底部文字预留位置 */
+  padding: 0 10px;
+  padding-bottom: 34px;
 }
-
-/* 单个垂直柱子项目 */
 .v-bar-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  height: 100%; /* 撑满容器高度 */
-  position: relative;
+  width: 40px;
+  flex-shrink: 0;
 }
-
-/* 顶部数值 */
-.v-bar-value {
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-/* 柱子轨道（控制最大高度和底色） */
 .v-bar-track {
-  width: 36px;
-  height: 140px; /* 图表中柱子可达到的最大高度 */
-  background: var(--bg-tertiary);
-  border-radius: 6px 6px 0 0;
+  width: 32px;
   display: flex;
-  align-items: flex-end; /* 从底部开始填充 */
-  overflow: hidden;
+  align-items: flex-end;
+  justify-content: center;
 }
-
-/* 柱子填充（动画高度） */
 .v-bar-fill {
-  width: 100%;
-  border-radius: 6px 6px 0 0;
-  transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 28px;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.6s ease;
 }
-
-/* 底部标签名称 */
 .v-bar-label {
-  position: absolute;
-  bottom: -26px; /* 放在底线下方 */
-  font-size: 13px;
+  font-size: 11px;
   color: var(--text-secondary);
-  font-weight: 500;
+  margin-top: 6px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  text-align: center;
+}
+.v-bar-value {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 2px;
 }
 </style>

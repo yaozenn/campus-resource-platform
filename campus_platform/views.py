@@ -43,7 +43,6 @@ def get_system_settings(request):
     if SETTINGS_FILE.exists():
         with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        # 补全缺失的默认字段（兼容旧配置文件）
         for k, v in DEFAULT_SETTINGS.items():
             if k not in data:
                 data[k] = v
@@ -95,6 +94,20 @@ def dashboard_stats(request):
                 'points_required': course.points_required
             })
 
+        resource_types = ResourceType.objects.all()
+        type_distribution = {}
+        main_category_distribution = {}
+        
+        for rt in resource_types:
+            count = Resource.objects.filter(type=rt, status='active').count()
+            type_distribution[rt.name] = count
+            
+            main_cat = rt.description
+            if main_cat in main_category_distribution:
+                main_category_distribution[main_cat] += count
+            else:
+                main_category_distribution[main_cat] = count
+
         return JsonResponse({
             'success': True,
             'stats': {
@@ -109,7 +122,9 @@ def dashboard_stats(request):
                 'teachers': teachers,
                 'admins': admins
             },
-            'topCourses': top_courses_data
+            'topCourses': top_courses_data,
+            'resourceTypeDistribution': type_distribution,
+            'mainCategoryDistribution': main_category_distribution
         })
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)

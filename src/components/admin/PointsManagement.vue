@@ -5,8 +5,7 @@
     </div>
 
     <el-tabs v-model="activeTab" @tab-change="onTabChange" class="points-tabs">
-      <!-- 用户积分 -->
-      <el-tab-pane label="用户积分" name="users">
+      <el-tab-pane label="学生积分" name="users">
         <div class="tab-toolbar">
           <input v-model="userSearch" placeholder="搜索用户名/姓名..." class="search-input" />
           <button @click="fetchUsers" class="btn-refresh">刷新</button>
@@ -15,28 +14,26 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th>用户名</th><th>姓名</th><th>角色</th><th>积分</th><th>操作</th>
+                <th>用户名</th><th>姓名</th><th>积分</th><th>操作</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="user in filteredUsers" :key="user.id">
                 <td>{{ user.username }}</td>
                 <td>{{ user.name || '-' }}</td>
-                <td><span :class="['role-badge', user.role]">{{ roleText(user.role) }}</span></td>
                 <td><span class="points-cell">{{ user.points }} 分</span></td>
                 <td>
                   <button @click="openAdjust(user)" class="btn-adjust">调整积分</button>
                 </td>
               </tr>
               <tr v-if="filteredUsers.length === 0">
-                <td colspan="5" class="empty-row">暂无数据</td>
+                <td colspan="4" class="empty-row">暂无数据</td>
               </tr>
             </tbody>
           </table>
         </div>
       </el-tab-pane>
 
-      <!-- 奖品管理 -->
       <el-tab-pane label="奖品管理" name="prizes">
         <div class="tab-toolbar">
           <button @click="showAddPrizeDialog = true" class="btn-add">+ 添加奖品</button>
@@ -78,7 +75,6 @@
         </div>
       </el-tab-pane>
 
-      <!-- 兑换记录 -->
       <el-tab-pane label="兑换记录" name="exchanges">
         <div class="tab-toolbar">
           <button @click="fetchExchanges" class="btn-refresh">刷新</button>
@@ -116,7 +112,6 @@
       </el-tab-pane>
     </el-tabs>
 
-    <!-- 调整积分弹窗 -->
     <div v-if="showAdjustDialog" class="dialog-overlay" @click="showAdjustDialog = false">
       <div class="dialog" @click.stop>
         <div class="dialog-header">
@@ -151,7 +146,6 @@
       </div>
     </div>
 
-    <!-- 添加/编辑奖品弹窗 -->
     <div v-if="showAddPrizeDialog || showEditPrizeDialog" class="dialog-overlay" @click="closePrizeDialog">
       <div class="dialog" @click.stop>
         <div class="dialog-header">
@@ -179,7 +173,7 @@
           </div>
           <div class="form-group">
             <label>图片链接</label>
-            <input v-model="currentPrize.image" placeholder="可选，填入图片URL" class="form-input" />
+            <input v-model="currentPrize.image_url" placeholder="可选，填入图片URL" class="form-input" />
           </div>
         </div>
         <div class="dialog-footer">
@@ -209,7 +203,7 @@ const adjustReason = ref('')
 
 const showAddPrizeDialog = ref(false)
 const showEditPrizeDialog = ref(false)
-const currentPrize = ref({ name: '', description: '', points_required: 0, stock: 0, image: '', is_active: true })
+const currentPrize = ref({ name: '', description: '', points_required: 0, stock: 0, image_url: '', is_active: true })
 
 const filteredUsers = computed(() => {
   const q = userSearch.value.toLowerCase()
@@ -217,7 +211,6 @@ const filteredUsers = computed(() => {
   return users.value.filter(u => u.username?.toLowerCase().includes(q) || u.name?.toLowerCase().includes(q))
 })
 
-const roleText = (r: string) => ({ admin: '管理员', student: '学生', teacher: '老师' }[r] || r)
 const exchangeStatusText = (s: string) => ({ pending: '待处理', approved: '已通过', rejected: '已拒绝' }[s] || s)
 const formatDate = (d: string) => d ? new Date(d).toLocaleString('zh-CN') : '-'
 
@@ -226,11 +219,8 @@ const headers = () => ({ Authorization: `Bearer ${getToken()}` })
 
 const fetchUsers = async () => {
   try {
-    const [t, s] = await Promise.all([
-      axios.get('http://127.0.0.1:8000/api/auth/teachers/', { headers: headers() }),
-      axios.get('http://127.0.0.1:8000/api/auth/students/', { headers: headers() })
-    ])
-    users.value = [...t.data, ...s.data]
+    const res = await axios.get('http://127.0.0.1:8000/api/auth/students/', { headers: headers() })
+    users.value = res.data
   } catch (e) { console.error(e) }
 }
 
@@ -268,13 +258,11 @@ const submitAdjust = async () => {
   try {
     const delta = adjustType.value === 'add' ? adjustAmount.value : -adjustAmount.value
     const newPoints = currentUser.value.points + delta
-    // 使用管理员更新接口，直接修改目标用户积分
     await axios.put(
       `http://127.0.0.1:8000/api/auth/update/${currentUser.value.id}/`,
       { points: newPoints },
       { headers: headers() }
     )
-    // 同步更新列表
     const target = users.value.find(u => u.id === currentUser.value.id)
     if (target) target.points = newPoints
     showAdjustDialog.value = false
@@ -376,13 +364,6 @@ onMounted(fetchUsers)
 .prize-name { font-weight: 500; }
 .handled-text { color: #c0c4cc; font-size: 13px; }
 
-.role-badge {
-  display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500;
-}
-.role-badge.admin { background: #fef0f0; color: #f56c6c; }
-.role-badge.student { background: #ecf5ff; color: #409eff; }
-.role-badge.teacher { background: #f0f9eb; color: #67c23a; }
-
 .points-cell { font-weight: 600; color: #e6a23c; }
 
 .status-badge {
@@ -403,7 +384,6 @@ onMounted(fetchUsers)
 .btn-approve { background: #f0f9eb; color: #67c23a; }
 .btn-delete { background: #fef0f0; color: #f56c6c; }
 
-/* 弹窗 */
 .dialog-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.45); display: flex;

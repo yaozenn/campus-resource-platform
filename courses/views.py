@@ -1,3 +1,4 @@
+# 建议直接覆盖 courses/views.py
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -29,6 +30,10 @@ class ResourceListView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
+        # 管理员可以看到所有资源
+        if hasattr(self.request, 'user') and self.request.user.is_authenticated and self.request.user.role == 'admin':
+            return Resource.objects.all()
+        # 普通用户只看已发布的
         queryset = Resource.objects.filter(status='active')
         resource_type = self.request.query_params.get('type')
         if resource_type:
@@ -39,26 +44,34 @@ class ResourceCreateView(generics.CreateAPIView):
     serializer_class = ResourceCreateSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def create(self, request, *args, **kwargs):
+        print('接收到的请求数据:', request.data)
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            print('验证失败详情:', serializer.errors)
+            return Response(serializer.errors, status=400)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=201, headers=headers)
+
     def perform_create(self, serializer):
         serializer.save(uploader=self.request.user, status='pending')
 
 class ResourceDetailView(generics.RetrieveAPIView):
-    """资源详情视图 - 增加了下载量自动统计逻辑"""
     queryset = Resource.objects.all()
     serializer_class = ResourceSerializer
     permission_classes = [permissions.AllowAny]
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        
-        # 核心修复：点击/获取资源详情时，下载次数原子性 +1
-        Resource.objects.filter(pk=instance.pk).update(downloads=models.F('downloads') + 1)
-        
-        # 刷新实例以获取最新的下载数值返回给前端
-        instance.refresh_from_db()
-        
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+# 新增：专门处理下载统计的视图
+class ResourceDownloadView(generics.GenericAPIView):
+    queryset = Resource.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        resource = self.get_object()
+        # 原子性增加下载次数
+        Resource.objects.filter(pk=resource.pk).update(downloads=models.F('downloads') + 1)
+        return Response({'status': 'success', 'file_url': resource.file_url})
 
 class ResourceUpdateView(generics.UpdateAPIView):
     queryset = Resource.objects.all()
@@ -91,16 +104,11 @@ class ResourceApproveView(generics.UpdateAPIView):
         action = request.data.get('action')
 
         if action == 'approve':
-            # 允许从“待审核”或“已拒绝”状态重新转为“已发布”
-            if resource.status in ['pending', 'rejected']:
-                resource.status = 'active'
-                resource.reject_reason = "" # 审核通过时清空之前的拒绝原因
-                
-                # 资源审核通过奖励：20分
-                uploader = resource.uploader
-                if uploader.role == 'student':
-                    uploader.add_points(20, 'upload', f"分享资源《{resource.title}》奖励")
-            
+            resource.status = 'active'
+            resource.reject_reason = ""
+            uploader = resource.uploader
+            if uploader.role == 'student':
+                uploader.add_points(20, 'upload', f"分享资源《{resource.title}》奖励")
         elif action == 'reject':
             resource.status = 'rejected'
             resource.reject_reason = request.data.get('reason', '')
@@ -108,12 +116,58 @@ class ResourceApproveView(generics.UpdateAPIView):
         resource.save()
         return Response(ResourceSerializer(resource).data)
 
+class ResourceStatusUpdateView(generics.UpdateAPIView):
+    queryset = Resource.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        if request.user.role != 'admin':
+            return Response({'detail': '仅管理员可操作'}, status=403)
+            
+        resource = self.get_object()
+        status_value = request.data.get('status')
+        
+        if status_value not in ['active', 'pending', 'rejected']:
+            return Response({'detail': '无效的状态值'}, status=400)
+        
+        if status_value == 'active' and resource.status != 'active':
+            uploader = resource.uploader
+            if uploader and uploader.role == 'student':
+                try:
+                    uploader.add_points(20, 'upload', f"分享资源《{resource.title}》奖励")
+                except:
+                    pass
+        
+        resource.status = status_value
+        resource.save()
+        return Response({'status': 'success', 'resource': ResourceSerializer(resource).data})
+
 class PendingResourceListView(generics.ListAPIView):
     queryset = Resource.objects.filter(status='pending')
     serializer_class = ResourceSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-# --- 评论与评分计算逻辑 ---
+# --- 收藏功能 ---
+class CollectionListView(generics.ListAPIView):
+    serializer_class = CollectionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    def get_queryset(self):
+        return ResourceCollection.objects.filter(user=self.request.user)
+
+class CollectionCreateView(generics.CreateAPIView):
+    serializer_class = CollectionCreateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+# 新增：取消收藏视图
+class CollectionDeleteView(generics.DestroyAPIView):
+    queryset = ResourceCollection.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    def get_queryset(self):
+        return ResourceCollection.objects.filter(user=self.request.user)
+
+# --- 评论与举报 ---
 class ResourceCommentView(generics.ListCreateAPIView):
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -124,18 +178,10 @@ class ResourceCommentView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         user = self.request.user
         resource_id = self.kwargs['pk']
-        
-        # 1. 检查是否是首次评论该资源，防止无限刷分
         is_first_comment = not ResourceComment.objects.filter(user=user, resource_id=resource_id).exists()
-        
-        # 2. 保存评论（包含用户打分 user_rating）
         comment = serializer.save(user=user, resource_id=resource_id)
-        
-        # 3. 积分奖励：仅限学生且是首次评论奖励 10 分
         if user.role == 'student' and is_first_comment:
             user.add_points(10, 'post', f"参与资源《{comment.resource.title}》讨论")
-            
-        # 4. 直接调用模型方法更新评分数据
         comment.resource.update_rating()
 
 class ResourceReportView(generics.CreateAPIView):
@@ -144,12 +190,6 @@ class ResourceReportView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(reporter=self.request.user)
-
-class CollectionListView(generics.ListAPIView):
-    serializer_class = CollectionSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    def get_queryset(self):
-        return ResourceCollection.objects.filter(user=self.request.user)
 
 class TeacherResourceListView(generics.ListAPIView):
     serializer_class = ResourceSerializer

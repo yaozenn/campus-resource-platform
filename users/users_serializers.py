@@ -27,8 +27,15 @@ class RegisterSerializer(serializers.ModelSerializer):
                   'gender', 'phone', 'signature', 'major', 'grade', 'subject', 'department']
 
     def create(self, validated_data):
-        # 空邮箱转 None，避免唯一约束冲突
-        email = validated_data.get('email') or None
+        # 处理邮箱：如果为空或已存在，生成唯一邮箱
+        email = validated_data.get('email', '').strip()
+        if not email:
+            email = f"{validated_data['username']}@example.com"
+        else:
+            # 检查邮箱是否已被使用
+            if User.objects.filter(email=email).exists():
+                email = f"{validated_data['username']}_{email.replace('@', '_at_')}"
+        
         user = User.objects.create_user(
             username=validated_data['username'],
             password=validated_data['password'],

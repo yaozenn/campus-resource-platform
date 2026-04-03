@@ -152,7 +152,14 @@ const submitResource = async () => {
     const token = localStorage.getItem('token')
     if (!formData.value.is_second_hand) formData.value.price = 0
     
-    await axios.post('http://127.0.0.1:8000/api/courses/create/', formData.value, {
+    const payload = {
+      ...formData.value,
+      type_id: Number(formData.value.type_id),
+      price: Number(formData.value.price || 0),
+      points_required: Number(formData.value.points_required || 0)
+    }
+    
+    await axios.post('http://127.0.0.1:8000/api/courses/create/', payload, {
       headers: { Authorization: `Bearer ${token}` }
     })
     alert('提交成功，请等待管理员审核！')
