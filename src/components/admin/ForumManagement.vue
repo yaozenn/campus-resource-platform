@@ -69,10 +69,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+
+import { useToast } from '../../composables/useToast'
 import axios from 'axios'
 import { IconMessageCircle, IconPlus, IconRefresh, IconEdit, IconDelete } from '@/components/icons'
 import { formatTime } from '../../utils/timeFormat'
 
+  const toast = useToast()
 const posts = ref<any[]>([])
 const showAddDialog = ref(false)
 const showEditDialog = ref(false)
@@ -93,7 +96,7 @@ const fetchPosts = async () => {
     posts.value = response.data
   } catch (error) {
     console.error('获取帖子列表失败', error)
-    alert('获取帖子列表失败，请检查网络连接')
+    toast.error('获取帖子列表失败，请检查网络连接')
   }
 }
 
@@ -118,9 +121,9 @@ const savePost = async () => {
     }
     closeDialog()
     fetchPosts()
-    alert('保存成功')
+    toast.success('保存成功')
   } catch (error) {
-    alert('保存失败')
+    toast.error('保存失败')
   }
 }
 
@@ -138,9 +141,9 @@ const deletePost = async (id: number) => {
         headers: { Authorization: `Bearer ${token}` }
       })
       posts.value = posts.value.filter(p => p.id !== id)
-      alert('删除成功')
+      toast.success('删除成功')
     } catch (error) {
-      alert('删除失败')
+      toast.error('删除失败')
     }
   }
 }

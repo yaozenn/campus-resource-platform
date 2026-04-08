@@ -77,18 +77,22 @@ class ResourceCollection(models.Model):
 
 class ResourceReport(models.Model):
     REASON_CHOICES = (
-        ('ad', '垃圾广告'),
-        ('copy', '侵权内容'),
-        ('bad', '内容违规'),
-        ('other', '其他原因'),
+        ('侵权', '涉嫌侵权'),
+        ('广告', '垃圾广告'),
+        ('违法', '违法违规'),
+        ('低俗', '低俗色情'),
+        ('其他', '其他原因'),
     )
     resource = models.ForeignKey(Resource, on_delete=models.CASCADE, related_name='reports', verbose_name='举报资源')
     reporter = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='举报人')
-    reason = models.CharField(max_length=20, choices=REASON_CHOICES, verbose_name='举报原因')
-    description = models.TextField(blank=True, verbose_name='详细说明')
+    reason_type = models.CharField(max_length=20, choices=REASON_CHOICES, verbose_name='举报原因', default='侵权')
+    details = models.TextField(blank=True, verbose_name='详细说明')
     status = models.CharField(max_length=20, default='pending', choices=(
         ('pending', '待处理'),
         ('resolved', '已处理'),
         ('ignored', '已忽略'),
     ), verbose_name='处理状态')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='举报时间')
+
+    def __str__(self):
+        return f"Report on {self.resource.title} by {self.reporter.username}"

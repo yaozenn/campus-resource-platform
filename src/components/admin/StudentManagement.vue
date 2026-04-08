@@ -121,8 +121,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+
+import { useToast } from '../../composables/useToast'
 import axios from 'axios'
 
+  const toast = useToast()
 const students = ref<any[]>([])
 const searchText = ref('')
 const showAddDialog = ref(false)
@@ -190,9 +193,9 @@ const saveStudent = async () => {
     }
     closeDialog()
     fetchStudents()
-    alert('保存成功')
+    toast.success('保存成功')
   } catch (e) {
-    alert('保存失败')
+    toast.error('保存失败')
   }
 }
 
@@ -204,9 +207,9 @@ const deleteStudent = async (id: number) => {
         headers: { Authorization: `Bearer ${token}` }
       })
       students.value = students.value.filter(s => s.id !== id)
-      alert('删除成功')
+      toast.success('删除成功')
     } catch (e) {
-      alert('删除失败')
+      toast.error('删除失败')
     }
   }
 }

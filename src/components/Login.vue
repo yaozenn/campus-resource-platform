@@ -246,6 +246,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+
+import { useToast } from '../composables/useToast'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import {
@@ -267,6 +269,7 @@ import {
 import PasswordStrength from './common/PasswordStrength.vue'
 import { validateUsername, validatePassword, validatePasswordMatch } from '@/utils/validation'
 
+  const toast = useToast()
 const router = useRouter()
 type RoleType = 'admin' | 'student' | 'teacher'
 const role = ref<RoleType>('student')
@@ -397,15 +400,15 @@ const handleSubmit = async () => {
 
 const handleChangePassword = async () => {
   if (!forgotForm.value.username || !forgotForm.value.oldPassword || !forgotForm.value.newPassword) {
-    alert('请填写所有必填项')
+    toast.warning('请填写所有必填项')
     return
   }
   if (forgotForm.value.newPassword.length < 6) {
-    alert('新密码至少需要6位')
+    toast.info('新密码至少需要6位')
     return
   }
   if (forgotForm.value.newPassword !== forgotForm.value.confirmPassword) {
-    alert('两次输入的新密码不一致')
+    toast.info('两次输入的新密码不一致')
     return
   }
 
@@ -422,7 +425,7 @@ const handleChangePassword = async () => {
     }, {
       headers: { Authorization: `Bearer ${token}` }
     })
-    alert('密码修改成功！请使用新密码登录')
+    toast.success('密码修改成功！请使用新密码登录')
     showForgotDialog.value = false
     forgotForm.value = { username: '', oldPassword: '', newPassword: '', confirmPassword: '', usernameError: '', oldPasswordError: '', newPasswordError: '', confirmPasswordError: '' }
   } catch (error: any) {

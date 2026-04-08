@@ -109,11 +109,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+
+import { useToast } from '../../composables/useToast'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import { formatTime, formatDateTime } from '../../utils/timeFormat'
 import { IconArrowLeft, IconFlame, IconUser, IconCalendar, IconEye, IconMessage, IconTrash, IconInbox } from '@/components/icons'
 
+  const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 const post = ref<any>(null)
@@ -168,7 +171,7 @@ const fetchPost = async () => {
     await incrementViews()
   } catch (error) {
     console.error('获取帖子详情失败', error)
-    alert('帖子不存在')
+    toast.info('帖子不存在')
     goBack()
   }
 }
@@ -194,12 +197,12 @@ const submitComment = async () => {
       { headers: { Authorization: `Bearer ${token}` } }
     )
     newComment.value = ''
-    alert('评论成功')
+    toast.success('评论成功')
     // 重新获取评论列表以显示最新评论
     await fetchComments()
   } catch (error: any) {
     console.error('评论失败', error)
-    alert('评论失败：' + (error.response?.data?.message || '未知错误'))
+    toast.error('评论失败：' + (error.response?.data?.message || '未知错误'))
   } finally {
     submitting.value = false
   }
@@ -213,10 +216,10 @@ const deletePost = async () => {
     await axios.delete(`http://127.0.0.1:8000/api/forum/${route.params.id}/delete/`, {
       headers: { Authorization: `Bearer ${token}` }
     })
-    alert('删除成功')
+    toast.success('删除成功')
     goBack()
   } catch (error) {
-    alert('删除失败')
+    toast.error('删除失败')
   }
 }
 

@@ -21,6 +21,7 @@ urlpatterns = [
     path('<int:pk>/comments/', views.ResourceCommentView.as_view(), name='resource_comments'),
     path('<int:pk>/reply/', views.comment_reply, name='comment_reply'),
     path('<int:pk>/report/', views.ResourceReportView.as_view(), name='resource_report'),
+    path('<int:pk>/rate/', views.resource_rate, name='resource_rate'),
     
     path('collections/', views.CollectionListView.as_view(), name='collection_list'),
     path('collect/', views.CollectionCreateView.as_view(), name='collection_create'), # 新增

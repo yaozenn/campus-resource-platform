@@ -61,7 +61,7 @@
                 <IconDownload class="action-icon" /> 下载原件
               </button>
               <button @click="toggleCollect" :class="['btn-action', isCollected ? 'btn-success' : 'btn-outline']">
-                <IconHeart class="action-icon" :class="{ filled: isCollected }" /> 
+                <IconHeart class="action-icon" :filled="isCollected" /> 
                 {{ isCollected ? '已收藏' : '加入收藏' }}
               </button>
             </div>
@@ -219,11 +219,14 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import { formatTime } from '../../utils/timeFormat'
+import { useToast } from '../../composables/useToast'
 import { 
   IconArrowLeft, IconDownload, IconEye, IconHeart, IconStar, 
   IconMessageCircle, IconBookOpen, IconAlertCircle, IconFolder,
   IconDocument, IconVideo, IconFile, IconClose, IconBook
 } from '../../components/icons'
+
+const toast = useToast()
 
 const route = useRoute()
 const router = useRouter()
@@ -301,43 +304,52 @@ const fetchRelatedCourses = async () => {
 
 // 用户交互行为
 const togglePreview = () => {
-  if (!course.value?.file_url) return alert('该资源暂无文件链接，无法预览')
+  if (!course.value?.file_url) return toast.warning('该资源暂无文件链接，无法预览')
   isPreviewing.value = true
 }
 
 const submitRating = async (star: number) => {
   userRating.value = star
   try {
-    // 这里预留了后端的评分API调用
-    // const token = localStorage.getItem('token')
-    // await axios.post(`http://127.0.0.1:8000/api/courses/${courseId.value}/rate/`, { rating: star }, { headers: { Authorization: `Bearer ${token}` } })
+    const token = localStorage.getItem('token')
+    const response = await axios.post(
+      `http://127.0.0.1:8000/api/courses/${courseId.value}/rate/`,
+      { rating: star },
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
     
-    // 暂时前端模拟显示效果
-    course.value.rating = ((course.value.rating + star) / 2).toFixed(1)
-    alert(`感谢评分！你给出了 ${star} 星。`)
+    // 更新显示的评分
+    if (response.data.rating) {
+      course.value.rating = response.data.rating
+    }
+    
+    toast.success(`感谢评分！你给出了 ${star} 星。`)
   } catch (error) {
-    alert('评分失败，请稍后再试')
+    toast.error('评分失败，请稍后再试')
   }
 }
 
 const submitReport = async () => {
   try {
-    // 这里预留了后端的举报API调用
-    // const token = localStorage.getItem('token')
-    // await axios.post(`http://127.0.0.1:8000/api/courses/${courseId.value}/report/`, reportData.value, { headers: { Authorization: `Bearer ${token}` } })
+    const token = localStorage.getItem('token')
+    await axios.post(
+      `http://127.0.0.1:8000/api/courses/${courseId.value}/report/`,
+      reportData.value,
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
     
-    alert('举报已提交！管理员将会在24小时内进行核实处理。')
+    toast.success('举报已提交！管理员将会在24小时内进行核实处理。')
     showReportModal.value = false
     reportData.value = { reason_type: '侵权', details: '' }
   } catch (error) {
-    alert('提交举报失败')
+    toast.error('提交举报失败')
   }
 }
 
 const submitComment = async () => {
   console.log('submitComment called, newComment:', newComment.value)
   if (!newComment.value.trim()) {
-    alert('请输入评论内容')
+    toast.warning('请输入评论内容')
     return
   }
   submitting.value = true
@@ -352,12 +364,12 @@ const submitComment = async () => {
     console.log('Comment posted successfully:', response.data)
     newComment.value = ''
     await fetchComments()
-    alert('评论成功！')
+    toast.success('评论成功！')
   } catch (error: any) {
     console.error('评论错误:', error)
     console.error('错误详情:', error.response?.data)
     console.error('错误状态码:', error.response?.status)
-    alert('评论失败：' + (error.response?.data?.detail || error.response?.data?.error || JSON.stringify(error.response?.data) || error.message || '未知错误'))
+    toast.error('评论失败：' + (error.response?.data?.detail || error.response?.data?.error || JSON.stringify(error.response?.data) || error.message || '未知错误'))
   } finally {
     submitting.value = false
     console.log('submitComment finished')
@@ -384,11 +396,11 @@ const toggleCollect = async () => {
       await axios.post('http://127.0.0.1:8000/api/courses/collect/', { resource: course.value?.id }, { headers: { Authorization: `Bearer ${token}` } })
       isCollected.value = true
     }
-  } catch (error: any) { alert('操作失败') }
+  } catch (error: any) { toast.error('操作失败') }
 }
 
 const downloadCourse = async () => {
-  if (!course.value?.file_url) return alert('该资源暂无下载链接')
+  if (!course.value?.file_url) return toast.warning('该资源暂无下载链接')
   try {
     const token = localStorage.getItem('token')
     await axios.post(`http://127.0.0.1:8000/api/courses/${course.value.id}/download/`, {}, { headers: { Authorization: `Bearer ${token}` } })
@@ -402,7 +414,7 @@ const downloadCourse = async () => {
     link.click()
     document.body.removeChild(link)
   } catch (error: any) {
-    alert(error.response?.data?.error || '下载失败')
+    toast.error(error.response?.data?.error || '下载失败')
   }
 }
 
@@ -461,16 +473,84 @@ onMounted(() => {
 .second-hand-badge { position: absolute; top: 20px; right: 20px; background: #f59e0b; color: white; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 16px; z-index: 2; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
 
 /* 操作工具栏 */
-.action-toolbar { display: flex; padding: 20px; gap: 16px; background: var(--bg-primary); }
-.btn-action { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: var(--border-radius-md); font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
-.action-icon { width: 20px; height: 20px; }
-.btn-primary { background: var(--primary-color); color: white; }
-.btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3); }
-.btn-outline-primary { background: transparent; border-color: var(--primary-color); color: var(--primary-color); }
-.btn-outline-primary:hover { background: var(--primary-soft); }
-.btn-success { background: #10b981; color: white; }
-.btn-outline { background: transparent; border-color: var(--border-color); color: var(--text-secondary); }
-.btn-outline:hover { border-color: var(--primary-color); color: var(--primary-color); }
+.action-toolbar { display: flex; padding: 20px; gap: 16px; background: var(--bg-primary); border-top: 1px solid var(--border-light); }
+.btn-action { 
+  flex: 1; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 8px; 
+  padding: 14px 20px; 
+  border-radius: var(--border-radius-lg); 
+  font-weight: 600; 
+  font-size: 15px; 
+  cursor: pointer; 
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+.btn-action::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.btn-action:hover::before {
+  opacity: 1;
+}
+.action-icon { width: 20px; height: 20px; transition: transform 0.3s; }
+.btn-action:hover .action-icon {
+  transform: scale(1.1);
+}
+.btn-primary { 
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); 
+  color: white;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
+}
+.btn-primary:hover { 
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(13, 148, 136, 0.4);
+}
+.btn-outline-primary { 
+  background: transparent; 
+  border-color: var(--primary-color); 
+  color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.1);
+}
+.btn-outline-primary:hover { 
+  background: var(--primary-soft);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(13, 148, 136, 0.2);
+}
+.btn-success { 
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+  color: white;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+.btn-success:hover {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+.btn-outline { 
+  background: transparent; 
+  border-color: var(--border-color); 
+  color: var(--text-secondary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+.btn-outline:hover { 
+  border-color: var(--primary-color); 
+  color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(13, 148, 136, 0.15);
+}
 
 .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 40px; }
 .empty-icon { width: 80px; height: 80px; color: var(--text-tertiary); margin-bottom: 16px; }

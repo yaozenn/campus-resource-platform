@@ -39,8 +39,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+
+import { useToast } from '../../composables/useToast'
 import axios from 'axios'
 
+  const toast = useToast()
 const posts = ref<any[]>([])
 const showPostDialog = ref(false)
 const newPost = ref({ title: '', content: '', visible_to: 'all' })
@@ -69,9 +72,9 @@ const createPost = async () => {
     showPostDialog.value = false
     newPost.value = { title: '', content: '', visible_to: 'all' }
     fetchPosts()
-    alert('发布成功')
+    toast.success('发布成功')
   } catch (error) {
-    alert('发布失败')
+    toast.error('发布失败')
   }
 }
 

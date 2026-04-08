@@ -11,6 +11,18 @@
       </button>
     </div>
     
+    <div class="search-bar">
+      <IconSearch class="search-icon" />
+      <input
+        v-model="searchText"
+        placeholder="搜索帖子..."
+        class="search-input"
+      />
+      <button v-if="searchText" @click="searchText = ''" class="clear-btn">
+        <IconClose class="clear-icon" />
+      </button>
+    </div>
+    
     <div class="post-list">
       <!-- 加载状态 -->
       <template v-if="loading">
@@ -27,8 +39,8 @@
       </template>
       
       <!-- 帖子列表 -->
-      <template v-else-if="posts.length > 0">
-        <div v-for="post in posts" :key="post.id" class="post-item" @click="viewPost(post)">
+      <template v-else-if="filteredPosts.length > 0">
+        <div v-for="post in filteredPosts" :key="post.id" class="post-item" @click="viewPost(post)">
           <div class="post-avatar">
             <div class="avatar-circle">
               {{ getAvatarInitials(post.author) }}
@@ -74,9 +86,9 @@
       <EmptyState
         v-else
         type="no-data"
-        title="暂无帖子"
-        description="快来发布第一条帖子，开启交流之旅吧！"
-        :show-action="true"
+        :title="searchText ? '未找到匹配的帖子' : '暂无帖子'"
+        :description="searchText ? '尝试其他关键词' : '快来发布第一条帖子，开启交流之旅吧！'"
+        :show-action="!searchText"
         action-text="发布帖子"
         @action="showPostDialog = true"
       />
@@ -104,17 +116,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { formatTime } from '../../utils/timeFormat'
 import { useRouter } from 'vue-router'
-import { IconMessageCircle, IconEdit, IconFlame, IconEye } from '../../components/icons'
+import { useToast } from '../../composables/useToast'
+import { IconMessageCircle, IconEdit, IconFlame, IconEye, IconSearch, IconClose } from '../../components/icons'
 import EmptyState from '../common/EmptyState.vue'
 
+const toast = useToast()
 const posts = ref<any[]>([])
 const loading = ref(false)
 const showPostDialog = ref(false)
 const newPost = ref({ title: '', content: '', visible_to: 'all' })
+const searchText = ref('')
 
 const router = useRouter()
 
@@ -134,6 +149,17 @@ const isHotPost = (post: any) => {
   const replies = post.replies || 0
   return views > 100 || replies > 20
 }
+
+const filteredPosts = computed(() => {
+  if (!searchText.value) {
+    return posts.value
+  }
+  const search = searchText.value.toLowerCase()
+  return posts.value.filter(post => 
+    post.title.toLowerCase().includes(search) || 
+    post.content.toLowerCase().includes(search)
+  )
+})
 
 const viewPost = (post: any) => {
   const user = JSON.parse(localStorage.getItem('user') || '{}')
@@ -168,9 +194,9 @@ const createPost = async () => {
     showPostDialog.value = false
     newPost.value = { title: '', content: '', visible_to: 'all' }
     fetchPosts()
-    alert('发布成功')
+    toast.success('发布成功')
   } catch (error) {
-    alert('发布失败')
+    toast.error('发布失败')
   }
 }
 
@@ -235,6 +261,61 @@ onMounted(() => {
 .btn-icon-svg {
   width: 18px;
   height: 18px;
+}
+
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  background: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: 0 16px;
+  transition: all 0.2s;
+}
+.search-bar:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+.search-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--text-placeholder);
+  flex-shrink: 0;
+}
+.search-input {
+  flex: 1;
+  padding: 14px 12px;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  outline: none;
+  color: var(--text-primary);
+}
+.search-input::placeholder {
+  color: var(--text-placeholder);
+}
+.clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: var(--bg-secondary);
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.clear-btn:hover {
+  background: var(--border-color);
+}
+.clear-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--text-secondary);
 }
 
 .post-list { 

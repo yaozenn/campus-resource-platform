@@ -56,6 +56,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+
+import { useToast } from '../../composables/useToast'
 import axios from 'axios'
 import { IconMessage, IconFolder, IconArrowLeft } from '../../components/icons'
 
@@ -93,7 +95,7 @@ const selectResource = async (resource: any) => {
 
 const submitReply = async (comment: any) => {
   const replyContent = replyMap.value[comment.id]
-  if (!replyContent?.trim()) return alert('回复内容不能为空')
+  if (!replyContent?.trim()) return toast.info('回复内容不能为空')
   try {
     const token = localStorage.getItem('token')
     await axios.patch(`http://127.0.0.1:8000/api/courses/${selectedResource.value.id}/comments/`, 
@@ -102,9 +104,9 @@ const submitReply = async (comment: any) => {
     )
     comment.reply = replyContent
     delete replyMap.value[comment.id]
-    alert('回复成功')
+    toast.success('回复成功')
   } catch (e) {
-    alert('回复失败')
+    toast.error('回复失败')
   }
 }
 

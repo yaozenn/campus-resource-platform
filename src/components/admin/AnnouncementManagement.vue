@@ -69,10 +69,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+
+import { useToast } from '../../composables/useToast'
 import axios from 'axios'
 import { IconBell, IconPlus, IconRefresh, IconEdit, IconDelete } from '@/components/icons'
 import { formatTime } from '../../utils/timeFormat'
 
+  const toast = useToast()
 const announcements = ref<any[]>([])
 const showAddDialog = ref(false)
 const showEditDialog = ref(false)
@@ -93,7 +96,7 @@ const fetchAnnouncements = async () => {
     announcements.value = response.data
   } catch (error) {
     console.error('获取公告列表失败', error)
-    alert('获取公告列表失败，请检查网络连接')
+    toast.error('获取公告列表失败，请检查网络连接')
   }
 }
 
@@ -122,9 +125,9 @@ const saveAnnouncement = async () => {
     }
     closeDialog()
     fetchAnnouncements()
-    alert('保存成功')
+    toast.success('保存成功')
   } catch (error) {
-    alert('保存失败')
+    toast.error('保存失败')
   }
 }
 
@@ -136,9 +139,9 @@ const deleteAnnouncement = async (id: number) => {
         headers: { Authorization: `Bearer ${token}` }
       })
       announcements.value = announcements.value.filter(a => a.id !== id)
-      alert('删除成功')
+      toast.success('删除成功')
     } catch (error) {
-      alert('删除失败')
+      toast.error('删除失败')
     }
   }
 }

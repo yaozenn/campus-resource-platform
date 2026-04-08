@@ -33,6 +33,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+
+import { useToast } from '../../composables/useToast'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import { formatDateTime } from '../../utils/timeFormat'
@@ -59,7 +61,7 @@ const fetchAnnouncement = async () => {
     announcement.value = response.data
   } catch (error) {
     console.error('获取公告详情失败', error)
-    alert('公告不存在')
+    toast.info('公告不存在')
     goBack()
   }
 }
@@ -72,10 +74,10 @@ const deleteAnnouncement = async () => {
     await axios.delete(`http://127.0.0.1:8000/api/announcements/${route.params.id}/`, {
       headers: { Authorization: `Bearer ${token}` }
     })
-    alert('删除成功')
+    toast.success('删除成功')
     goBack()
   } catch (error) {
-    alert('删除失败')
+    toast.error('删除失败')
   }
 }
 

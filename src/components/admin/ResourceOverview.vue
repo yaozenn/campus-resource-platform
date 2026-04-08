@@ -236,6 +236,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+
+import { useToast } from '../../composables/useToast'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { 
@@ -244,6 +246,7 @@ import {
   IconUser, IconCalendar, IconVideo, IconDocument
 } from '@/components/icons'
 
+  const toast = useToast()
 const router = useRouter()
 const resources = ref<any[]>([])
 const searchText = ref('')
@@ -355,7 +358,7 @@ const approveResource = async (resource: any) => {
       { headers: { Authorization: `Bearer ${token}` } }
     )
     resource.status = 'active'
-    alert('审核通过！')
+    toast.info('审核通过！')
   } catch (error: any) {
     console.error('审核失败', error)
     alert(error.response?.data?.detail || '操作失败，请稍后重试')
@@ -371,7 +374,7 @@ const rejectResource = async (resource: any) => {
       { headers: { Authorization: `Bearer ${token}` } }
     )
     resource.status = 'rejected'
-    alert('已拒绝该资源')
+    toast.info('已拒绝该资源')
   } catch (error: any) {
     console.error('拒绝失败', error)
     alert(error.response?.data?.detail || '操作失败，请稍后重试')
@@ -386,7 +389,7 @@ const deleteResource = async (resource: any) => {
       { headers: { Authorization: `Bearer ${token}` } }
     )
     resources.value = resources.value.filter(r => r.id !== resource.id)
-    alert('删除成功！')
+    toast.success('删除成功！')
   } catch (error: any) {
     console.error('删除失败', error)
     alert(error.response?.data?.detail || '删除失败，请稍后重试')

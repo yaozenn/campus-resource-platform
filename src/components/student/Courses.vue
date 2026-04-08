@@ -136,7 +136,7 @@
 
           <div class="course-actions" @click.stop>
             <button @click="toggleCollect(course)" :class="['btn-action', isCollected(course.id) ? 'collected' : '']">
-              <IconHeart class="action-icon" :class="{ filled: isCollected(course.id) }" />
+              <IconHeart class="action-icon" :filled="isCollected(course.id)" />
             </button>
             <button @click="viewDetails(course)" class="btn-action btn-primary">
               <IconEye class="action-icon" /> <span>详情</span>
@@ -160,12 +160,14 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import { useToast } from '../../composables/useToast'
 import {
   IconVideo, IconBook, IconDocument, IconArrowLeft, IconSearch, IconClose,
   IconStar, IconClock, IconRefresh, IconCollection, IconSort, IconUser,
   IconDownload, IconHeart, IconEye, IconFolder
 } from '../../components/icons'
 
+const toast = useToast()
 const router = useRouter()
 
 const courses = ref<any[]>([])
@@ -272,9 +274,9 @@ const downloadCourse = async (course: any) => {
     if (res.data.file_url) {
       window.open(res.data.file_url, '_blank')
       course.downloads += 1
-      alert('下载已开始')
+      toast.success('下载已开始')
     }
-  } catch (error: any) { alert(error.response?.data?.error || '下载失败') }
+  } catch (error: any) { toast.error(error.response?.data?.error || '下载失败') }
 }
 
 const isCollected = (courseId: number) => collections.value.some(c => c.resource?.id === courseId)
@@ -288,15 +290,15 @@ const toggleCollect = async (course: any) => {
         headers: { Authorization: `Bearer ${token}` }
       })
       collections.value = collections.value.filter(c => c.id !== collection.id)
-      alert('已取消收藏')
+      toast.success('已取消收藏')
     } else {
       await axios.post('http://127.0.0.1:8000/api/courses/collect/', { resource: course.id }, {
         headers: { Authorization: `Bearer ${token}` }
       })
       await fetchCollections()
-      alert('收藏成功')
+      toast.success('收藏成功')
     }
-  } catch (error) { alert('操作失败') }
+  } catch (error) { toast.error('操作失败') }
 }
 
 const enterCategory = (categoryId: string) => { currentCategory.value = categoryId; showResourceList.value = true; filterType.value = '' }
@@ -399,9 +401,66 @@ onMounted(() => { fetchCourseTypes(); fetchCourses(); fetchCollections() })
 .teacher-tag { color: var(--primary-color); font-weight: 600; background: var(--primary-soft); padding: 2px 8px; border-radius: 4px;}
 
 .course-actions { display: flex; gap: 8px; padding: 0 24px 24px; }
-.btn-action { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border-radius: var(--border-radius); cursor: pointer; border: 1px solid var(--border-color); background: white; }
-.btn-action.collected { background: #fef2f2; border-color: #fca5a5; color: #ef4444; }
-.btn-primary { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+.btn-action { 
+  flex: 1; 
+  display: inline-flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 6px; 
+  padding: 12px; 
+  border-radius: var(--border-radius-lg); 
+  cursor: pointer; 
+  border: 2px solid transparent;
+  background: white;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.btn-action::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.btn-action:hover::before {
+  opacity: 1;
+}
+.btn-action svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.3s;
+}
+.btn-action:hover svg {
+  transform: scale(1.1);
+}
+.btn-action.collected { 
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+  border-color: #10b981; 
+  color: white;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+.btn-action.collected:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+.btn-primary { 
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); 
+  color: white; 
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
+}
+.btn-primary:hover { 
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(13, 148, 136, 0.4);
+}
 
 .fade-in { animation: fadeIn 0.4s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

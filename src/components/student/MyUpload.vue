@@ -93,9 +93,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+
+import { useToast } from '../../composables/useToast'
 import axios from 'axios'
 import { IconUpload, IconClose } from '../icons'
 
+  const toast = useToast()
 const myResources = ref<any[]>([])
 const types = ref<any[]>([])
 const showUploadModal = ref(false)
@@ -144,7 +147,7 @@ const closeUploadModal = () => {
 
 const submitResource = async () => {
   if (!formData.value.type_id) {
-    alert('请选择资源分类！')
+    toast.warning('请选择资源分类！')
     return
   }
 
@@ -162,7 +165,7 @@ const submitResource = async () => {
     await axios.post('http://127.0.0.1:8000/api/courses/create/', payload, {
       headers: { Authorization: `Bearer ${token}` }
     })
-    alert('提交成功，请等待管理员审核！')
+    toast.success('提交成功，请等待管理员审核！')
     closeUploadModal()
     fetchMyResources()
   } catch (error: any) { 
@@ -182,9 +185,9 @@ const deleteResource = async (id: number) => {
     await axios.delete(`http://127.0.0.1:8000/api/courses/${id}/delete/`, {
       headers: { Authorization: `Bearer ${token}` }
     })
-    alert('删除成功')
+    toast.success('删除成功')
     fetchMyResources()
-  } catch (error) { alert('删除失败') }
+  } catch (error) { toast.error('删除失败') }
 }
 
 onMounted(() => {

@@ -189,7 +189,41 @@ class ResourceReportView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(reporter=self.request.user)
+        resource_id = self.kwargs['pk']
+        resource = Resource.objects.get(pk=resource_id)
+        serializer.save(reporter=self.request.user, resource=resource)
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def resource_rate(request, pk):
+    try:
+        resource = Resource.objects.get(pk=pk)
+        rating = request.data.get('rating')
+        if not rating or not 1 <= rating <= 5:
+            return Response({'error': '评分必须在1-5之间'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 检查用户是否已经评过分，如果有就更新，没有就创建一个评论
+        user = request.user
+        comment, created = ResourceComment.objects.get_or_create(
+            user=user,
+            resource=resource,
+            defaults={'content': '用户评分', 'user_rating': rating}
+        )
+        
+        if not created:
+            comment.user_rating = rating
+            comment.save()
+        
+        # 更新资源评分
+        resource.update_rating()
+        
+        return Response({
+            'success': True,
+            'rating': resource.rating,
+            'rating_count': resource.rating_count
+        })
+    except Resource.DoesNotExist:
+        return Response({'error': '资源不存在'}, status=status.HTTP_404_NOT_FOUND)
 
 class TeacherResourceListView(generics.ListAPIView):
     serializer_class = ResourceSerializer

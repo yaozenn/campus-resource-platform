@@ -187,8 +187,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+
+import { useToast } from '../../composables/useToast'
 import axios from 'axios'
 
+  const toast = useToast()
 const activeTab = ref('users')
 const users = ref<any[]>([])
 const prizes = ref<any[]>([])
@@ -253,8 +256,8 @@ const openAdjust = (user: any) => {
 }
 
 const submitAdjust = async () => {
-  if (!adjustAmount.value || adjustAmount.value <= 0) return alert('请输入有效积分数量')
-  if (!adjustReason.value.trim()) return alert('请填写调整原因')
+  if (!adjustAmount.value || adjustAmount.value <= 0) return toast.warning('请输入有效积分数量')
+  if (!adjustReason.value.trim()) return toast.warning('请填写调整原因')
   try {
     const delta = adjustType.value === 'add' ? adjustAmount.value : -adjustAmount.value
     const newPoints = currentUser.value.points + delta
@@ -268,7 +271,7 @@ const submitAdjust = async () => {
     showAdjustDialog.value = false
     alert(`积分${adjustType.value === 'add' ? '增加' : '扣除'}成功`)
   } catch (e) {
-    alert('操作失败')
+    toast.error('操作失败')
   }
 }
 
@@ -292,15 +295,15 @@ const savePrize = async () => {
     }
     closePrizeDialog()
     fetchPrizes()
-    alert('保存成功')
-  } catch (e) { alert('保存失败') }
+    toast.success('保存成功')
+  } catch (e) { toast.error('保存失败') }
 }
 
 const togglePrize = async (prize: any) => {
   try {
     await axios.put(`http://127.0.0.1:8000/api/points/manage/${prize.id}/`, { ...prize, is_active: !prize.is_active }, { headers: headers() })
     prize.is_active = !prize.is_active
-  } catch (e) { alert('操作失败') }
+  } catch (e) { toast.error('操作失败') }
 }
 
 const deletePrize = async (id: number) => {
@@ -308,7 +311,7 @@ const deletePrize = async (id: number) => {
     try {
       await axios.delete(`http://127.0.0.1:8000/api/points/delete/${id}/`, { headers: headers() })
       prizes.value = prizes.value.filter(p => p.id !== id)
-    } catch (e) { alert('删除失败') }
+    } catch (e) { toast.error('删除失败') }
   }
 }
 
@@ -316,14 +319,14 @@ const approveExchange = async (ex: any) => {
   try {
     await axios.put(`http://127.0.0.1:8000/api/points/approve/${ex.id}/`, { action: 'approve' }, { headers: headers() })
     ex.status = 'approved'
-  } catch (e) { alert('操作失败') }
+  } catch (e) { toast.error('操作失败') }
 }
 
 const rejectExchange = async (ex: any) => {
   try {
     await axios.put(`http://127.0.0.1:8000/api/points/approve/${ex.id}/`, { action: 'reject' }, { headers: headers() })
     ex.status = 'rejected'
-  } catch (e) { alert('操作失败') }
+  } catch (e) { toast.error('操作失败') }
 }
 
 onMounted(fetchUsers)

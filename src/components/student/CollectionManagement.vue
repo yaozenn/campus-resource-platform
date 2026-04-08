@@ -8,10 +8,7 @@
     <div v-if="collections.length > 0" class="collection-grid">
       <div v-for="item in collections" :key="item.id" class="collection-card" @click="viewResource(item.resource)">
         <div class="card-top">
-          <span class="type-tag">{{ item.resource?.type?.name || '未分类' }}</span>
-          <span class="points-badge">
-            <IconDiamond class="badge-icon" /> {{ item.resource?.points_required ?? 0 }} 积分
-          </span>
+          <span class="type-tag">{{ item.resource?.type_name || item.resource?.type?.name || '未分类' }}</span>
         </div>
         <h3 class="card-title">{{ item.resource?.title || '未知资源' }}</h3>
         <p class="card-desc">{{ item.resource?.description || '暂无描述' }}</p>
@@ -43,8 +40,10 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { formatDateTime } from '../../utils/timeFormat'
-import { IconCollection, IconDiamond, IconDownload, IconClock, IconClose, IconBook } from '@/components/icons'
+import { useToast } from '../../composables/useToast'
+import { IconCollection, IconDownload, IconClock, IconClose, IconBook } from '@/components/icons'
 
+const toast = useToast()
 const router = useRouter()
 const collections = ref<any[]>([])
 
@@ -67,11 +66,11 @@ const uncollect = async (item: any) => {
       headers: { Authorization: `Bearer ${token}` }
     })
     collections.value = collections.value.filter(c => c.id !== item.id)
-    alert('已取消收藏！')
+    toast.success('已取消收藏！')
   } catch (e: any) {
     console.error('取消收藏失败:', e)
     const msg = e.response?.data?.detail || e.response?.data?.error || '取消失败，请稍后重试'
-    alert(msg)
+    toast.error(msg)
   }
 }
 
@@ -84,18 +83,14 @@ const downloadResource = async (resource: any) => {
   if (!resource) return
   try {
     if (!resource.file_url) {
-      alert('该资源暂无下载链接')
+      toast.warning('该资源暂无下载链接')
       return
     }
 
     const token = localStorage.getItem('token')
-    
     await axios.post(`http://127.0.0.1:8000/api/courses/${resource.id}/download/`, {}, {
       headers: { Authorization: `Bearer ${token}` }
     })
-    
-    resource.downloads += 1
-    
     const link = document.createElement('a')
     link.href = resource.file_url
     link.target = '_blank'
@@ -104,11 +99,11 @@ const downloadResource = async (resource: any) => {
     link.click()
     document.body.removeChild(link)
     
-    alert('下载已开始！')
+    toast.success('下载已开始！')
   } catch (e: any) {
     console.error('下载失败:', e)
     const msg = e.response?.data?.detail || e.response?.data?.error || '下载失败，请稍后重试'
-    alert(msg)
+    toast.error(msg)
   }
 }
 
@@ -151,15 +146,6 @@ onMounted(fetchCollections)
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
 }
-.points-badge { 
-  color: var(--warning-color); 
-  font-size: var(--font-size-sm); 
-  font-weight: var(--font-weight-medium);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.badge-icon { width: 14px; height: 14px; }
 
 .card-title {
   margin: 0;

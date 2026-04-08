@@ -226,6 +226,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+
+import { useToast } from '../../composables/useToast'
 import axios from 'axios'
 import { formatTime } from '../../utils/timeFormat'
 import {
@@ -248,6 +250,7 @@ import {
   IconGlobe
 } from '../../components/icons'
 
+  const toast = useToast()
 const courses = ref<any[]>([])
 const courseTypes = ref<any[]>([])
 const showAddDialog = ref(false)
@@ -437,7 +440,7 @@ const saveCourse = async () => {
     // 确保type是数字
     const typeId = parseInt(currentCourse.value.type)
     if (isNaN(typeId)) {
-      alert('请选择有效的资源类型')
+      toast.warning('请选择有效的资源类型')
       return
     }
 
@@ -480,7 +483,7 @@ const saveCourse = async () => {
     }
     closeDialog()
     fetchCourses()
-    alert('保存成功')
+    toast.success('保存成功')
   } catch (error: any) {
     console.error('保存失败:', error)
     console.error('Error response:', error.response)
@@ -497,9 +500,9 @@ const deleteCourse = async (id: number) => {
         headers: { Authorization: `Bearer ${token}` }
       })
       courses.value = courses.value.filter(c => c.id !== id)
-      alert('删除成功')
+      toast.success('删除成功')
     } catch (error) {
-      alert('删除失败')
+      toast.error('删除失败')
     }
   }
 }

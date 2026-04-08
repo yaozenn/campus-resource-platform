@@ -210,12 +210,15 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+
+import { useToast } from '../../composables/useToast'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 // 修改点 1：使用相对路径 ../icons 解决找不到模块的问题
 // 修改点 2：移除了未使用的 IconGraduationCap, IconUser, IconCalendar
 import { IconBookOpen, IconMessageCircle, IconStar, IconLock, IconEdit, IconClose } from '../icons'
 
+  const toast = useToast()
 const user = ref<any>(null)
 const isEditing = ref(false)
 const showPasswordModal = ref(false)
@@ -234,7 +237,7 @@ const triggerFileInput = () => fileInput.value?.click()
 
 const handleAvatarUpload = (event: Event) => {
   const target = event.target as HTMLInputElement
-  if (target.files && target.files[0]) alert('头像上传功能开发中')
+  if (target.files && target.files[0]) toast.info('头像上传功能开发中')
 }
 
 const saveProfile = async () => {
@@ -246,9 +249,9 @@ const saveProfile = async () => {
     user.value = response.data
     localStorage.setItem('user', JSON.stringify(response.data))
     isEditing.value = false
-    alert('保存成功')
+    toast.success('保存成功')
   } catch (error) {
-    alert('保存失败')
+    toast.error('保存失败')
   }
 }
 
@@ -258,8 +261,8 @@ const closePasswordModal = () => {
 }
 
 const handleChangePassword = async () => {
-  if (passwordForm.value.new_password.length < 6) return alert('新密码长度不能少于 6 位')
-  if (passwordForm.value.new_password !== passwordForm.value.confirm_password) return alert('两次输入的新密码不一致')
+  if (passwordForm.value.new_password.length < 6) return toast.info('新密码长度不能少于 6 位')
+  if (passwordForm.value.new_password !== passwordForm.value.confirm_password) return toast.info('两次输入的新密码不一致')
   
   passwordLoading.value = true
   try {
@@ -269,7 +272,7 @@ const handleChangePassword = async () => {
       new_password: passwordForm.value.new_password
     }, { headers: { Authorization: `Bearer ${token}` } })
     
-    alert('密码修改成功，请重新登录')
+    toast.success('密码修改成功，请重新登录')
     closePasswordModal()
     localStorage.removeItem('token')
     localStorage.removeItem('user')

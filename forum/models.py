@@ -14,6 +14,7 @@ class ForumPost(models.Model):
     post_date = models.DateTimeField(auto_now_add=True, verbose_name='发布时间')
     status = models.CharField(max_length=20, default='approved', verbose_name='状态')
     visible_to = models.CharField(max_length=20, choices=VISIBLE_CHOICES, default='all', verbose_name='可见范围')
+    views = models.IntegerField(default=0, verbose_name='浏览量')
 
     def __str__(self):
         return self.title

@@ -67,7 +67,7 @@ class ReportSerializer(serializers.ModelSerializer):
         fields = ('resource', 'reason', 'description')
 
 class CollectionSerializer(serializers.ModelSerializer):
-    resource_details = ResourceSerializer(source='resource', read_only=True)
+    resource = ResourceSerializer(read_only=True)
     class Meta:
         model = ResourceCollection
         fields = '__all__'

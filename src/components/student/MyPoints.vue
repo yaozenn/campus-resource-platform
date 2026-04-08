@@ -108,8 +108,10 @@
   <script setup lang="ts">
   import { ref, onMounted } from 'vue'
   import axios from 'axios'
+  import { useToast } from '../../composables/useToast'
   import { IconStar, IconUpload, IconMessageCircle, IconCalendar, IconCheck, IconGift } from '../icons'
 
+  const toast = useToast()
   const userPoints = ref(0)
   const hasSigned = ref(false)
   const prizes = ref<any[]>([])
@@ -161,9 +163,9 @@
       userPoints.value += 5
       hasSigned.value = true
       localStorage.setItem('lastSignDate', new Date().toDateString())
-      alert('签到成功！积分 +5')
+      toast.success('签到成功！积分 +5')
     } catch (error) {
-      alert('签到失败')
+      toast.error('签到失败')
     }
   }
 
@@ -188,11 +190,11 @@
         { prize_id: prize.id }, 
         { headers: { Authorization: `Bearer ${token}` } }
       )
-      alert('兑换成功！请联系管理员领取奖品。')
+      toast.success('兑换成功！请联系管理员领取奖品。')
       fetchUserInfo() // 刷新积分
       fetchPrizes()   // 刷新库存
     } catch (error: any) {
-      alert(error.response?.data?.error || '兑换失败，可能是库存不足或接口异常')
+      toast.error(error.response?.data?.error || '兑换失败，可能是库存不足或接口异常')
     }
   }
 

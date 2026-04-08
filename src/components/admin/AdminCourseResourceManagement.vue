@@ -121,9 +121,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+
+import { useToast } from '../../composables/useToast'
 import axios from 'axios'
 import { IconGlobe, IconHome, IconBook } from '@/components/icons'
 
+  const toast = useToast()
 const resources = ref<any[]>([])
 const searchText = ref('')
 const filterStatus = ref('')
@@ -192,7 +195,7 @@ const approveResource = async (resource: any) => {
     )
     resource.status = 'active'
   } catch (e) {
-    alert('操作失败')
+    toast.error('操作失败')
   }
 }
 
@@ -206,7 +209,7 @@ const toggleStatus = async (resource: any) => {
     )
     resource.status = action === 'approve' ? 'active' : 'rejected'
   } catch (e) {
-    alert('操作失败')
+    toast.error('操作失败')
   }
 }
 
@@ -219,7 +222,7 @@ const deleteResource = async (id: number) => {
       })
       resources.value = resources.value.filter(r => r.id !== id)
     } catch (e) {
-      alert('删除失败')
+      toast.error('删除失败')
     }
   }
 }

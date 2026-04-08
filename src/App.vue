@@ -1,10 +1,17 @@
 <template>
-  <transition name="fade" mode="out-in">
-    <router-view />
-  </transition>
+  <div id="app">
+    <transition name="fade" mode="out-in">
+      <router-view />
+    </transition>
+    <Toast />
+  </div>
 </template>
 
 <script setup lang="ts">
+import Toast from './components/common/Toast.vue'
+import { createToast } from './composables/useToast'
+
+createToast()
 </script>
 
 <style>

@@ -114,6 +114,8 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+
+import { useToast } from '../../composables/useToast'
 import axios from 'axios'
 
 const user = ref<any>(null)
@@ -144,8 +146,8 @@ const saveProfile = async () => {
     const response = await axios.put('http://127.0.0.1:8000/api/auth/profile/', profileData, { headers: { Authorization: `Bearer ${token}` } })
     user.value = response.data
     localStorage.setItem('user', JSON.stringify(response.data))
-    alert('管理员配置保存成功')
-  } catch (error) { alert('保存失败') }
+    toast.success('管理员配置保存成功')
+  } catch (error) { toast.error('保存失败') }
 }
 
 onMounted(() => {
