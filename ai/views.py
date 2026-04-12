@@ -70,18 +70,24 @@ def teacher_insight(request):
     根据该老师所有课程的浏览量、下载量、评论数、评论内容，
     让 AI 自动生成个性化教学建议。
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
     from courses.models import Resource, ResourceComment
 
     user = request.user
+    logger.info(f"教师 {user.username} 请求AI教学建议")
+    
     if user.role not in ('teacher', 'admin'):
         return Response({'error': '仅教师可用'}, status=403)
 
     # 拉取该老师的课程数据
     resources = Resource.objects.filter(uploader=user)
+    logger.info(f"找到 {resources.count()} 个课程资源")
 
     if not resources.exists():
         return Response({
-            'insight': '您目前还没有上传任何课程资源，快去上传第一份资源吧！上传后我会根据学生的反馈为您提供教学建议。',
+            'insight': '👋 欢迎使用智能教学助手！\n\n您目前还没有上传任何课程资源。建议您：\n\n1. 先上传第一份教学资源\n2. 引导学生下载和评论\n3. 之后再来获取个性化教学建议\n\n期待您的精彩课程！',
             'stats': []
         })
 
@@ -110,6 +116,12 @@ def teacher_insight(request):
         data_lines.append(line)
 
     data_summary = "\n".join(data_lines)
+    logger.info(f"课程数据摘要准备完成")
+    
+    # 检查API密钥
+    api_key = os.getenv('DOUBAO_API_KEY', '')
+    endpoint_id = os.getenv('DOUBAO_ENDPOINT_ID', '')
+    logger.info(f"API密钥状态: {'已设置' if api_key else '未设置'}, 端点ID: {endpoint_id if endpoint_id else '未设置'}")
 
     system_prompt = """你是一位经验丰富、亲切友好的教学顾问，专门帮助大学教师改进教学质量。
 你会根据课程数据（下载量、评论数、评论内容）给出具体、实用、温暖的教学建议。
