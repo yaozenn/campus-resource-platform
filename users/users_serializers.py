@@ -8,7 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'role', 'name', 'email', 'student_id', 'employee_id',
                   'gender', 'phone', 'signature', 'major', 'grade', 'subject', 'department', 
-                  'points', 'supervisor']
+                  'points', 'supervisor', 'avatar']
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):

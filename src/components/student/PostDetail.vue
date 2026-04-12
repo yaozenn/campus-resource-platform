@@ -57,9 +57,11 @@
         <div class="comments-list">
           <div v-for="comment in comments" :key="comment.id" class="comment-item">
             <div class="comment-avatar">
-              <div class="avatar-circle">
-                {{ (comment.author?.name || comment.author?.username || 'U').charAt(0).toUpperCase() }}
-              </div>
+              <Avatar 
+                :avatar="comment.author?.avatar" 
+                :name="comment.author?.name || comment.author?.username || 'U'"
+                :size="48"
+              />
             </div>
             <div class="comment-body">
               <div class="comment-header">
@@ -115,6 +117,7 @@ import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import { formatTime, formatDateTime } from '../../utils/timeFormat'
 import { IconArrowLeft, IconFlame, IconUser, IconCalendar, IconEye, IconMessage, IconTrash, IconInbox } from '@/components/icons'
+import Avatar from '../common/Avatar.vue'
 
   const toast = useToast()
 const route = useRoute()
