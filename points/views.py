@@ -1,6 +1,8 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from .models import PointRecord, Prize, PrizeExchange
+from rest_framework.views import APIView
+from django.utils import timezone
+from .models import PointRecord, Prize, PrizeExchange, CheckInRecord
 from .serializers import PointRecordSerializer, PrizeSerializer, PrizeExchangeSerializer
 
 # 1. 积分流水列表
@@ -96,3 +98,37 @@ class PrizeDeleteView(generics.DestroyAPIView):
     queryset = Prize.objects.all()
     serializer_class = PrizeSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+# 签到相关视图
+class CheckInStatusView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        today = timezone.now().date()
+        has_signed = CheckInRecord.objects.filter(user=request.user, checkin_date=today).exists()
+        return Response({'has_signed': has_signed})
+
+class CheckInView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        today = timezone.now().date()
+        
+        # 检查今天是否已经签到过
+        if CheckInRecord.objects.filter(user=request.user, checkin_date=today).exists():
+            return Response({'error': '今日已签到'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 创建签到记录
+        CheckInRecord.objects.create(user=request.user, checkin_date=today)
+        
+        # 增加积分
+        user = request.user
+        if user.role == 'student':
+            user.add_points(5, 'checkin', '每日签到奖励')
+        
+        return Response({
+            'success': True,
+            'points': user.points,
+            'points_added': 5,
+            'message': '签到成功！积分 +5'
+        })

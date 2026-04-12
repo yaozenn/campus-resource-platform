@@ -12,4 +12,7 @@ urlpatterns = [
     path('manage/', views.PrizeManageView.as_view(), name='prize_manage'),
     path('manage/<int:pk>/', views.PrizeUpdateView.as_view(), name='prize_update'),
     path('delete/<int:pk>/', views.PrizeDeleteView.as_view(), name='prize_delete'),
+    # 签到相关
+    path('checkin/status/', views.CheckInStatusView.as_view(), name='checkin_status'),
+    path('checkin/', views.CheckInView.as_view(), name='checkin'),
 ]

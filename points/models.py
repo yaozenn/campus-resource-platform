@@ -1,5 +1,20 @@
 from django.db import models
+from django.utils import timezone
 from users.models import User
+
+class CheckInRecord(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='checkin_records', verbose_name='用户')
+    checkin_date = models.DateField(verbose_name='签到日期')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+
+    class Meta:
+        verbose_name = '签到记录'
+        verbose_name_plural = verbose_name
+        ordering = ['-checkin_date', '-created_at']
+        unique_together = [('user', 'checkin_date')]
+
+    def __str__(self):
+        return f"{self.user.username} - {self.checkin_date}"
 
 class PointRecord(models.Model):
     CHANGE_TYPE_CHOICES = (

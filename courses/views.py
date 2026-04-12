@@ -170,7 +170,11 @@ class CollectionDeleteView(generics.DestroyAPIView):
 # --- 评论与举报 ---
 class ResourceCommentView(generics.ListCreateAPIView):
     serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
 
     def get_queryset(self):
         return ResourceComment.objects.filter(resource_id=self.kwargs['pk'])

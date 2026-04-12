@@ -15,7 +15,7 @@ urlpatterns = [
     path('api/forum/', include('forum.urls')),
     path('api/announcements/', include('announcements.urls')),
     path('api/points/', include('points.urls')),
-    path('api/ai/', include('ai.urls')),
+    # path('api/ai/', include('ai.urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/stats/', views.dashboard_stats, name='dashboard_stats'),

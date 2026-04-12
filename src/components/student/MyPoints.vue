@@ -145,27 +145,32 @@
     }
   }
 
-  // 获取签到状态 (这需要后端支持，这里做简单的本地模拟，如果你后端有签到接口请替换)
-  const checkSignStatus = () => {
-    const lastSign = localStorage.getItem('lastSignDate')
-    const today = new Date().toDateString()
-    hasSigned.value = lastSign === today
+  // 获取签到状态 (调用后端API)
+  const checkSignStatus = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const res = await axios.get('http://127.0.0.1:8000/api/points/checkin/status/', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      hasSigned.value = res.data.has_signed
+    } catch (error) {
+      console.error('获取签到状态失败', error)
+    }
   }
 
-  // 签到操作 (调用后端增分接口或本地模拟)
+  // 签到操作 (调用后端API)
   const handleSign = async () => {
     if (hasSigned.value) return
     try {
-      // 假设你有一个后端的签到/加分接口，如果没有，需要后端添加
-      // await axios.post('http://127.0.0.1:8000/api/points/sign/', {}, { headers: ... })
-      
-      // 临时演示效果：直接前端加5分并记录
-      userPoints.value += 5
+      const token = localStorage.getItem('token')
+      const res = await axios.post('http://127.0.0.1:8000/api/points/checkin/', {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
       hasSigned.value = true
-      localStorage.setItem('lastSignDate', new Date().toDateString())
       toast.success('签到成功！积分 +5')
-    } catch (error) {
-      toast.error('签到失败')
+      fetchUserInfo() // 刷新积分
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || '签到失败')
     }
   }
 
