@@ -88,12 +88,24 @@
             
             <div class="comments-list">
               <div v-for="comment in comments" :key="comment.id" class="comment-item">
-                <div class="avatar-circle">
-                  {{ comment.user?.name?.charAt(0) || comment.user?.username?.charAt(0) || 'U' }}
-                </div>
+                <Avatar 
+                  :avatar="comment.user_avatar || comment.user?.avatar" 
+                  :name="comment.user?.name || comment.user?.username || 'U'"
+                  class="comment-avatar"
+                />
                 <div class="comment-body">
                   <div class="comment-header">
-                    <span class="comment-author">{{ comment.user?.name || comment.user?.username }}</span>
+                    <div class="comment-header-left">
+                      <span class="comment-author">{{ comment.user?.name || comment.user?.username }}</span>
+                      <div v-if="comment.user_rating" class="comment-rating">
+                        <IconStar 
+                          v-for="star in 5" 
+                          :key="star" 
+                          class="small-star"
+                          :class="{ active: star <= comment.user_rating }"
+                        />
+                      </div>
+                    </div>
                     <span class="comment-time">{{ formatTime(comment.created_at) }}</span>
                   </div>
                   <p class="comment-content">{{ comment.content }}</p>
@@ -225,6 +237,7 @@ import {
   IconMessageCircle, IconBookOpen, IconAlertCircle, IconFolder,
   IconDocument, IconVideo, IconFile, IconClose, IconBook
 } from '../../components/icons'
+import Avatar from '../../components/common/Avatar.vue'
 
 const toast = useToast()
 
@@ -615,9 +628,13 @@ onMounted(() => {
 .comment-actions { display: flex; justify-content: flex-end; margin-top: 12px; margin-bottom: 30px; }
 .comment-item { display: flex; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid var(--border-light); margin-bottom: 20px; }
 .comment-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-.avatar-circle { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-soft); color: var(--primary-dark); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
-.comment-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.comment-avatar { flex-shrink: 0; }
+.comment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.comment-header-left { display: flex; align-items: center; gap: 12px; }
 .comment-author { font-weight: 600; font-size: 14px; color: var(--text-primary); }
+.comment-rating { display: flex; gap: 2px; }
+.small-star { width: 14px; height: 14px; color: #d1d5db; }
+.small-star.active { color: #f59e0b; fill: #f59e0b; }
 .comment-time { font-size: 12px; color: var(--text-tertiary); }
 .comment-content { margin: 0; font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
 .empty-state-small { text-align: center; color: var(--text-tertiary); padding: 20px; font-size: 14px; }
