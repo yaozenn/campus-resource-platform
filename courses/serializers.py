@@ -53,8 +53,10 @@ class ResourceCreateSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.username', read_only=True)
-    user_avatar = serializers.URLField(source='user.avatar', read_only=True)
+    user_real_name = serializers.CharField(source='user.name', read_only=True, allow_null=True)
+    user_avatar = serializers.URLField(source='user.avatar', read_only=True, allow_null=True)
     created_at = serializers.DateTimeField(source='comment_date', read_only=True)
+    user_info = UserSerializer(source='user', read_only=True)
 
     class Meta:
         model = ResourceComment

@@ -89,14 +89,14 @@
             <div class="comments-list">
               <div v-for="comment in comments" :key="comment.id" class="comment-item">
                 <Avatar 
-                  :avatar="comment.user_avatar || comment.user?.avatar" 
-                  :name="comment.user?.name || comment.user?.username || 'U'"
+                  :avatar="comment.user_avatar || comment.user_info?.avatar || comment.user?.avatar" 
+                  :name="comment.user_real_name || comment.user_info?.name || comment.user?.name || comment.user_name || comment.user_info?.username || comment.user?.username || 'U'"
                   class="comment-avatar"
                 />
                 <div class="comment-body">
                   <div class="comment-header">
                     <div class="comment-header-left">
-                      <span class="comment-author">{{ comment.user?.name || comment.user?.username }}</span>
+                      <span class="comment-author">{{ comment.user_real_name || comment.user_info?.name || comment.user?.name || comment.user_name || comment.user_info?.username || comment.user?.username }}</span>
                       <div v-if="comment.user_rating" class="comment-rating">
                         <IconStar 
                           v-for="star in 5" 
