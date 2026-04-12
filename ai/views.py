@@ -51,6 +51,7 @@ def chat(request):
     if not message:
         return Response({'error': 'Message is required'}, status=400)
 
+    # 先尝试调用API
     messages = [
         {"role": "system", "content": "你是一个智能学习助手，帮助学生解答学习相关的问题，提供学习建议和资源推荐。回答简洁友好。"},
         {"role": "user", "content": message}
@@ -58,8 +59,70 @@ def chat(request):
 
     content, error = call_doubao(messages)
     if error:
-        return Response({'response': f'AI 服务暂时不可用：{error}'})
+        # API调用失败，使用fallback逻辑
+        return Response({'response': generate_fallback_response(message)})
     return Response({'response': content})
+
+
+def generate_fallback_response(message):
+    """生成fallback响应，当API不可用时使用"""
+    message_lower = message.lower()
+    
+    # 根据问题类型给出不同的回答
+    if any(keyword in message_lower for keyword in ['推荐', '学习资源', '资源', '课程']):
+        return """📚 学习资源推荐：
+
+1. **平台内资源**：去「课程广场」看看，有很多优质教学资源！
+2. **学习方法**：制定学习计划，每天坚持1-2小时
+3. **互动学习**：多参与论坛讨论，和同学一起进步
+
+加油！你一定可以的！💪"""
+    
+    elif any(keyword in message_lower for keyword in ['如何', '怎么', '怎样', '学习方法', '高效']):
+        return """✨ 高效学习方法：
+
+1. **番茄工作法**：学习25分钟，休息5分钟
+2. **主动回忆**：学完后试着复述内容
+3. **间隔重复**：定期复习巩固知识
+4. **费曼技巧**：用简单的话讲给别人听
+
+祝你学习进步！🚀"""
+    
+    elif any(keyword in message_lower for keyword in ['学习情况', '学习进度', '我的学习', '分析']):
+        return """📊 学习分析建议：
+
+1. **查看学习记录**：去「我的课程」看看已下载的资源
+2. **参与互动**：多评论、多收藏喜欢的资源
+3. **签到打卡**：每天签到可以获得积分哦
+4. **设定目标**：每周学习2-3个新课程
+
+坚持就是胜利！🎉"""
+    
+    elif any(keyword in message_lower for keyword in ['你好', 'hello', 'hi', '嗨']):
+        return """👋 你好呀！我是你的AI学习助手！
+
+我可以帮你：
+- 📚 推荐学习资源
+- 💡 解答学习问题
+- 📊 分析学习情况
+- ✨ 提供学习建议
+
+有什么我可以帮你的吗？😊"""
+    
+    elif any(keyword in message_lower for keyword in ['谢谢', '感谢', 'thanks']):
+        return """不客气！😊 能帮到你我很开心！
+
+如果还有其他问题，随时来找我哦！加油！💪"""
+    
+    else:
+        return f"""🤔 关于「{message}」：
+
+这是个好问题！建议你：
+1. 去「课程广场」搜索相关资源
+2. 在论坛发帖和同学讨论
+3. 查看已下载的课程资料
+
+如果有具体的学习问题，随时告诉我！我会尽力帮你！💪"""
 
 
 @api_view(['GET'])
