@@ -25,9 +25,11 @@ class UserPointsView(generics.GenericAPIView):
 
 # 3. 奖品列表（公开）
 class PrizeListView(generics.ListAPIView):
-    queryset = Prize.objects.all()
     serializer_class = PrizeSerializer
     permission_classes = [permissions.AllowAny]
+    
+    def get_queryset(self):
+        return Prize.objects.filter(is_active=True)
 
 # 4. 提交兑换申请
 class PrizeExchangeView(generics.CreateAPIView):
@@ -35,9 +37,9 @@ class PrizeExchangeView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
-        prize_id = request.data.get('prize')
+        prize_id = request.data.get('prize') or request.data.get('prize_id')
         try:
-            prize = Prize.objects.get(id=prize_id)
+            prize = Prize.objects.get(id=prize_id, is_active=True)
         except Prize.DoesNotExist:
             return Response({'error': '奖品不存在'}, status=404)
 
