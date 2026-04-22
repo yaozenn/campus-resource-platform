@@ -55,7 +55,7 @@ const router = createRouter({
         { path: 'points', name: 'MyPoints', component: () => import('../components/student/MyPoints.vue') },
         // 👇 新增的：学生我的上传/分享页面
         { path: 'uploads', name: 'StudentUploads', component: () => import('../components/student/MyUpload.vue') },
-        { path: '', redirect: '/student/forum' }
+        { path: '', redirect: '/student/courses' }
       ]
     },
     {

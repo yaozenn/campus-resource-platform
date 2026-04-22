@@ -9,11 +9,11 @@
       <nav class="nav-menu">
         <router-link to="/student/courses" class="nav-item">
           <IconBook class="nav-icon" />
-          <span>大厅浏览</span>
+          <span>资源大厅</span>
         </router-link>
         <router-link to="/student/uploads" class="nav-item">
           <IconUpload class="nav-icon" />
-          <span>我的分享</span>
+          <span>资源上传</span>
         </router-link>
         <router-link to="/student/collections" class="nav-item">
           <IconStar class="nav-icon" />
