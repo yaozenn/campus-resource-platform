@@ -57,9 +57,11 @@
       <template v-else-if="filteredPosts.length > 0">
         <div v-for="post in filteredPosts" :key="post.id" class="post-item" @click="viewPost(post)">
           <div class="post-avatar">
-            <div class="avatar-circle">
-              {{ getAvatarInitials(post.author) }}
-            </div>
+            <Avatar 
+              :avatar="post.author?.avatar" 
+              :name="post.author?.name || post.author?.username || 'U'"
+              :size="48"
+            />
           </div>
           
           <div class="post-content">
@@ -138,6 +140,7 @@ import { useRouter } from 'vue-router'
 import { useToast } from '../../composables/useToast'
 import { IconMessageCircle, IconEdit, IconFlame, IconEye, IconSearch, IconClose, IconSort } from '../../components/icons'
 import EmptyState from '../common/EmptyState.vue'
+import Avatar from '../common/Avatar.vue'
 
 const toast = useToast()
 const posts = ref<any[]>([])
@@ -153,17 +156,6 @@ const sortOptions = [
 ]
 
 const router = useRouter()
-
-const getVisibleText = (visible: string) => {
-  const map: any = { all: '公开', student: '学生', teacher: '老师' }
-  return map[visible] || visible
-}
-
-const getAvatarInitials = (author: any) => {
-  if (!author) return 'U'
-  const name = author.name || author.username || 'Unknown'
-  return name.charAt(0).toUpperCase()
-}
 
 const isHotPost = (post: any) => {
   const views = post.views || 0

@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import AIAssistantFloating from '../components/student/AIAssistantFloating.vue'
 import { 
@@ -66,13 +66,27 @@ import {
   IconMessage,
   IconUpload
 } from '../components/icons'
+import { getAvatar, getUser, getUserInitial, getUserName, getUserPoints } from '../utils/avatar'
 
 const router = useRouter()
-const user = JSON.parse(localStorage.getItem('user') || '{}')
-const userAvatar = user.avatar || ''
-const userName = computed(() => user.name || user.username || '同学')
-const userInitial = computed(() => (user.name || user.username || 'S').charAt(0).toUpperCase())
-const userPoints = computed(() => user.points || 0)
+const userAvatar = ref(getAvatar())
+const userName = computed(() => getUserName())
+const userInitial = computed(() => getUserInitial())
+const userPoints = computed(() => getUserPoints())
+
+// 监听localStorage变化，实时更新头像
+const handleStorageChange = () => {
+  userAvatar.value = getAvatar()
+}
+
+// 监听localStorage变化
+window.addEventListener('storage', handleStorageChange)
+
+// 组件卸载时移除监听器
+import { onUnmounted } from 'vue'
+onUnmounted(() => {
+  window.removeEventListener('storage', handleStorageChange)
+})
 
 const goToPoints = () => {
   router.push('/student/points')

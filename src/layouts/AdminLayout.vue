@@ -58,25 +58,40 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { 
-  IconSettings,
-  IconUser,
-  IconBook,
-  IconForum,
-  IconAnnouncement,
-  IconCollection,
-  IconStar,
+  IconSettings, 
+  IconUsers, 
+  IconBook, 
+  IconStar, 
+  IconMessage, 
+  IconAnnouncement, 
+  IconDatabase, 
   IconLogout,
-  IconMessage
+  IconSparkles,
+  IconFile,
+  IconPlus
 } from '../components/icons'
+import { getAvatar, getUserInitial, getUserName } from '../utils/avatar'
 
 const router = useRouter()
-const user = JSON.parse(localStorage.getItem('user') || '{}')
-const userAvatar = user.avatar || ''
-const userName = computed(() => user.name || user.username || '管理员')
-const userInitial = computed(() => (user.name || user.username || 'A').charAt(0).toUpperCase())
+const userAvatar = ref(getAvatar())
+const userName = computed(() => getUserName())
+const userInitial = computed(() => getUserInitial())
+
+// 监听localStorage变化，实时更新头像
+const handleStorageChange = () => {
+  userAvatar.value = getAvatar()
+}
+
+// 监听localStorage变化
+window.addEventListener('storage', handleStorageChange)
+
+// 组件卸载时移除监听器
+onUnmounted(() => {
+  window.removeEventListener('storage', handleStorageChange)
+})
 
 const handleLogout = () => {
   localStorage.removeItem('token')
