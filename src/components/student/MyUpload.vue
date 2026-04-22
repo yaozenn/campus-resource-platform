@@ -2,7 +2,7 @@
   <div class="page-container fade-in">
     <div class="page-header">
       <div class="header-content">
-        <h2>我的分享</h2>
+        <h2>资源上传</h2>
         <p class="subtitle">上传课件、笔记或闲置书籍，赚取积分并帮助他人</p>
       </div>
       <button @click="openUploadModal" class="btn btn-primary">

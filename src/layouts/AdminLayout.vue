@@ -71,7 +71,10 @@ import {
   IconLogout,
   IconSparkles,
   IconFile,
-  IconPlus
+  IconPlus,
+  IconUser,
+  IconForum,
+  IconCollection
 } from '../components/icons'
 import { getAvatar, getUserInitial, getUserName } from '../utils/avatar'
 

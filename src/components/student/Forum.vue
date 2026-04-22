@@ -163,6 +163,11 @@ const isHotPost = (post: any) => {
   return views > 100 || replies > 20
 }
 
+const getVisibleText = (visible: string) => {
+  const map: any = { all: '公开', student: '学生', teacher: '老师' }
+  return map[visible] || visible
+}
+
 const filteredPosts = computed(() => {
   if (!searchText.value) {
     return posts.value
