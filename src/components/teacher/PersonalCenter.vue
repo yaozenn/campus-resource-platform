@@ -184,9 +184,41 @@ const defaultAvatar = 'https://via.placeholder.com/150'
 const getGenderText = (gender: string) => ({ male: '男', female: '女', other: '其他' }[gender] || '未设置')
 const triggerFileInput = () => fileInput.value?.click()
 
-const handleAvatarUpload = (event: Event) => {
+const handleAvatarUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement
-  if (target.files && target.files[0]) toast.info('头像上传功能开发中')
+  if (target.files && target.files[0]) {
+    const file = target.files[0]
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('头像文件大小不能超过 5MB')
+      return
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('只支持 JPG、PNG、GIF 格式的图片')
+      return
+    }
+
+    try {
+      const token = localStorage.getItem('token')
+      const formData = new FormData()
+      formData.append('avatar', file)
+
+      const response = await axios.post('http://127.0.0.1:8000/api/auth/avatar/', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+
+      user.value = response.data.user
+      localStorage.setItem('user', JSON.stringify(response.data.user))
+      toast.success('头像上传成功')
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || '头像上传失败')
+    }
+  }
 }
 
 const saveProfile = async () => {

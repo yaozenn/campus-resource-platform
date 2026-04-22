@@ -35,7 +35,8 @@
           <span>{{ userPoints }} 积分</span>
         </div>
         <router-link to="/student/personal" class="user-avatar-link">
-          <div class="user-avatar">{{ userInitial }}</div>
+          <img v-if="userAvatar" :src="userAvatar" alt="头像" class="user-avatar-img" />
+          <div v-else class="user-avatar">{{ userInitial }}</div>
         </router-link>
         <button @click="handleLogout" class="logout-btn" title="退出登录">
           <IconLogout class="logout-icon" />
@@ -68,6 +69,7 @@ import {
 
 const router = useRouter()
 const user = JSON.parse(localStorage.getItem('user') || '{}')
+const userAvatar = user.avatar || ''
 const userName = computed(() => user.name || user.username || '同学')
 const userInitial = computed(() => (user.name || user.username || 'S').charAt(0).toUpperCase())
 const userPoints = computed(() => user.points || 0)
@@ -101,6 +103,8 @@ const handleLogout = () => {
 .user-avatar-link { text-decoration: none; }
 .user-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary-color), var(--primary-light)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: white; transition: transform var(--transition-fast); }
 .user-avatar:hover { transform: scale(1.05); }
+.user-avatar-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; transition: transform var(--transition-fast); }
+.user-avatar-img:hover { transform: scale(1.05); }
 .logout-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--border-color); border-radius: 50%; cursor: pointer; color: var(--text-secondary); transition: all var(--transition-fast); }
 .logout-btn:hover { background: rgba(239, 68, 68, 0.1); border-color: #ef4444; color: #ef4444; }
 .logout-icon { width: 20px; height: 20px; }

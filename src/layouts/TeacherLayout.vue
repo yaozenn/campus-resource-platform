@@ -36,7 +36,8 @@
       
       <div class="nav-actions">
         <router-link to="/teacher/personal" class="user-info">
-          <div class="user-avatar">{{ userInitial }}</div>
+          <img v-if="userAvatar" :src="userAvatar" alt="头像" class="user-avatar-img" />
+          <div v-else class="user-avatar">{{ userInitial }}</div>
           <span class="user-name">{{ userName }}</span>
         </router-link>
         <button @click="handleLogout" class="logout-btn" title="退出登录">
@@ -68,6 +69,7 @@ import {
 
 const router = useRouter()
 const user = JSON.parse(localStorage.getItem('user') || '{}')
+const userAvatar = user.avatar || ''
 const userName = computed(() => user.name || user.username || '老师')
 const userInitial = computed(() => (user.name || user.username || 'T').charAt(0).toUpperCase())
 
@@ -186,6 +188,13 @@ const handleLogout = () => {
   font-size: 14px;
   font-weight: 700;
   color: white;
+}
+
+.user-avatar-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .user-name {

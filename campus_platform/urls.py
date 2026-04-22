@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import path, include, re_path
 from django.views.generic import TemplateView
 from django.contrib.staticfiles.views import serve
@@ -23,6 +24,13 @@ urlpatterns = [
     path('api/settings/save/', views.save_system_settings, name='save_settings'),
     # 前端静态资源
     re_path(r'^assets/(?P<path>.*)$', serve, {'document_root': BASE_DIR / 'dist/assets'}),
-    # 所有其他路径都返回前端 index.html（让 Vue Router 接管）
+]
+
+# 在开发环境中提供媒体文件服务
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# 所有其他路径都返回前端 index.html（让 Vue Router 接管）
+urlpatterns += [
     re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),
 ]

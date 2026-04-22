@@ -4,11 +4,24 @@ from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    resource_count = serializers.SerializerMethodField()
+    post_count = serializers.SerializerMethodField()
+    collection_count = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = ['id', 'username', 'role', 'name', 'email', 'student_id', 'employee_id',
-                  'gender', 'phone', 'signature', 'major', 'grade', 'subject', 'department', 
-                  'points', 'supervisor', 'avatar']
+                  'gender', 'phone', 'signature', 'major', 'grade', 'subject', 'department',
+                  'points', 'supervisor', 'avatar', 'resource_count', 'post_count', 'collection_count']
+
+    def get_resource_count(self, obj):
+        return obj.uploaded_resources.filter(status__in=['approved', 'active']).count()
+
+    def get_post_count(self, obj):
+        return obj.posts.filter(status='approved').count()
+
+    def get_collection_count(self, obj):
+        return obj.collections.count()
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
